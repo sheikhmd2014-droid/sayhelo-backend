@@ -15,34 +15,39 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
-/* ROOT ROUTE */
 app.get("/", (req, res) => {
-  res.send("SayHello Backend is running 🚀");
+  res.send("SayHello Backend is running");
 });
 
-/* SOCKET LOGIC */
-let onlineUsers = new Map();
+// 🔹 users store
+let users = {};
 
 io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
+  console.log("User connected:", socket.id);
 
+  // register user
   socket.on("join", (username) => {
-    onlineUsers.set(socket.id, username);
-    io.emit("online-users", Array.from(onlineUsers.values()));
+    users[socket.id] = username;
+
+    io.emit("users", Object.values(users));
   });
 
-  socket.on("send-message", (data) => {
-    io.emit("receive-message", data);
+  // receive message
+  socket.on("message", (msg) => {
+    io.emit("message", {
+      user: users[socket.id],
+      text: msg,
+    });
   });
 
   socket.on("disconnect", () => {
-    onlineUsers.delete(socket.id);
-    io.emit("online-users", Array.from(onlineUsers.values()));
-    console.log("🔴 User disconnected:", socket.id);
+    delete users[socket.id];
+    io.emit("users", Object.values(users));
+    console.log("User disconnected");
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(✅ Server running on port ${PORT});
+  console.log("Server running on port", PORT);
 });
