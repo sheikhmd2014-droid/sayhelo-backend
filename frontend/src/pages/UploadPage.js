@@ -288,6 +288,26 @@ export default function UploadPage() {
                 {formatFileSize(fileSize)}
               </div>
             )}
+            
+            {/* Trim Button */}
+            {selectedFile && (
+              <button
+                onClick={() => setShowEditor(true)}
+                className="absolute bottom-3 right-3 px-3 py-2 rounded-full bg-fuchsia-500 hover:bg-fuchsia-600 flex items-center gap-2 text-sm font-medium transition-colors"
+                data-testid="trim-button"
+              >
+                <Scissors className="w-4 h-4" />
+                Trim
+              </button>
+            )}
+            
+            {/* Trim info badge */}
+            {trimInfo && (
+              <div className="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-green-500/80 text-xs font-medium flex items-center gap-1">
+                <Scissors className="w-3 h-3" />
+                Trimmed: {Math.round(trimInfo.duration)}s
+              </div>
+            )}
           </div>
         ) : (
           <div 
