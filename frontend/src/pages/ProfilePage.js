@@ -247,7 +247,25 @@ export default function ProfilePage() {
           </div>
 
           {/* Actions */}
-          {!isOwnProfile && (
+          {isOwnProfile ? (
+            <div className="flex gap-3">
+              <Button
+                onClick={openEditModal}
+                className="px-6 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 font-semibold active-scale"
+                data-testid="edit-profile-button"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit Profile
+              </Button>
+              <Button
+                onClick={() => navigate('/upload')}
+                className="px-6 h-10 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 hover:from-fuchsia-600 hover:to-violet-700 font-semibold active-scale"
+                data-testid="add-video-button"
+              >
+                + Add Video
+              </Button>
+            </div>
+          ) : (
             <Button
               onClick={handleFollow}
               disabled={followLoading}
