@@ -69,8 +69,8 @@ export default function QRCodePage() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Fun Video App',
-          text: 'Check out Fun Video App - Watch, Create & Share Fun Videos!',
+          title: 'FunMastis',
+          text: 'Check out FunMastis - Watch, Create & Share Masti Videos!',
           url: appUrl
         });
       } else {
@@ -109,9 +109,9 @@ export default function QRCodePage() {
             </div>
           </div>
           <h2 className="font-unbounded font-black text-2xl bg-gradient-to-r from-fuchsia-500 to-violet-500 bg-clip-text text-transparent">
-            Fun Video
+            FunMastis
           </h2>
-          <p className="text-zinc-500 text-sm mt-1">Watch, Create & Share Fun Videos</p>
+          <p className="text-zinc-500 text-sm mt-1">Watch, Create & Share Masti Videos</p>
         </div>
 
         {/* QR Code */}

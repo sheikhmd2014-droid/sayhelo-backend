@@ -105,7 +105,7 @@ export default function VideoCard({ video, isActive, onLikeUpdate }) {
       
       if (navigator.share) {
         await navigator.share({
-          title: `${video.username} on Fun Video App`,
+          title: `${video.username} on FunMastis`,
           text: video.caption,
           url: window.location.origin + `/?v=${video.id}`
         });
