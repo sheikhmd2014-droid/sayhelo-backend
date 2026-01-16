@@ -48,11 +48,15 @@ export default function UploadPage() {
   const [fileSize, setFileSize] = useState(0);
   const [compressing, setCompressing] = useState(false);
   const [compressionQuality, setCompressionQuality] = useState(0.7);
+  const [showEditor, setShowEditor] = useState(false);
+  const [trimInfo, setTrimInfo] = useState(null);
   const videoRef = useRef(null);
   const fileInputRef = useRef(null);
   const canvasRef = useRef(null);
   const { token } = useAuth();
   const navigate = useNavigate();
+
+  const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB limit
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
