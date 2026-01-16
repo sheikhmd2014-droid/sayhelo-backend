@@ -63,67 +63,69 @@ function AppContent() {
   
   return (
     <div className="min-h-screen bg-black">
-      <Routes>
-        <Route
-          path="/auth"
-          element={
-            <PublicRoute>
-              <AuthPage />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={<ForgotPasswordPage />}
-        />
-        <Route
-          path="/"
-          element={
-            <>
-              <FeedPage />
-              <Navbar />
-            </>
-          }
-        />
-        <Route
-          path="/upload"
-          element={
-            <ProtectedRoute>
-              <UploadPage />
-              <Navbar />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile/:userId"
-          element={
-            <>
-              <ProfilePage />
-              <Navbar />
-            </>
-          }
-        />
-        <Route
-          path="/search"
-          element={
-            <>
-              <SearchPage />
-              <Navbar />
-            </>
-          }
-        />
-        <Route
-          path="/qr-code"
-          element={
-            <>
-              <QRCodePage />
-              <Navbar />
-            </>
-          }
-        />
-        <Route path="/admin" element={<AdminLoginPage />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route
+            path="/auth"
+            element={
+              <PublicRoute>
+                <AuthPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPasswordPage />}
+          />
+          <Route
+            path="/"
+            element={
+              <>
+                <FeedPage />
+                <Navbar />
+              </>
+            }
+          />
+          <Route
+            path="/upload"
+            element={
+              <ProtectedRoute>
+                <UploadPage />
+                <Navbar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:userId"
+            element={
+              <>
+                <ProfilePage />
+                <Navbar />
+              </>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <>
+                <SearchPage />
+                <Navbar />
+              </>
+            }
+          />
+          <Route
+            path="/qr-code"
+            element={
+              <>
+                <QRCodePage />
+                <Navbar />
+              </>
+            }
+          />
+          <Route path="/admin" element={<AdminLoginPage />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        </Routes>
+      </Suspense>
       <Toaster position="top-center" theme="dark" />
     </div>
   );
