@@ -108,10 +108,23 @@ export default function UploadPage() {
   const uploadVideoFile = async () => {
     if (!selectedFile) return null;
     
+    // Check file size again
+    if (selectedFile.size > MAX_FILE_SIZE && !trimInfo) {
+      toast.error('Video too large! Please trim it first');
+      setShowEditor(true);
+      return null;
+    }
+    
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append('video', selectedFile);
+      
+      // Add trim info if available
+      if (trimInfo) {
+        formData.append('trim_start', trimInfo.startTime.toString());
+        formData.append('trim_end', trimInfo.endTime.toString());
+      }
       
       const response = await axios.post(`${API}/upload/video`, formData, {
         headers: {
@@ -127,7 +140,12 @@ export default function UploadPage() {
       return response.data.video_url;
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Failed to upload video. Try a smaller file.');
+      if (error.response?.status === 413) {
+        toast.error('Video too large for server. Please trim it shorter.');
+        setShowEditor(true);
+      } else {
+        toast.error('Failed to upload video. Try a smaller file.');
+      }
       return null;
     } finally {
       setUploading(false);
