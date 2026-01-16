@@ -93,19 +93,116 @@ export default function VideoCard({ video, isActive, onLikeUpdate }) {
 
   const handleShare = async (e) => {
     e.stopPropagation();
+    setShowShareModal(true);
+  };
+
+  const handleNativeShare = async () => {
     try {
       await axios.post(`${API}/videos/${video.id}/share`);
+      setSharesCount(prev => prev + 1);
+      
       if (navigator.share) {
         await navigator.share({
-          title: video.caption,
-          url: window.location.origin + `/video/${video.id}`
+          title: `${video.username} on Fun Video App`,
+          text: video.caption,
+          url: window.location.origin + `/?v=${video.id}`
         });
       } else {
-        await navigator.clipboard.writeText(window.location.origin + `/video/${video.id}`);
+        await navigator.clipboard.writeText(window.location.origin + `/?v=${video.id}`);
         toast.success('Link copied!');
       }
     } catch (error) {
-      console.error('Share failed:', error);
+      if (error.name !== 'AbortError') {
+        console.error('Share failed:', error);
+      }
+    }
+  };
+
+  const handleShareToInstagram = async () => {
+    try {
+      await axios.post(`${API}/videos/${video.id}/share`);
+      setSharesCount(prev => prev + 1);
+      
+      // Open Instagram story share (works on mobile)
+      const instagramUrl = `instagram://library?AssetPath=${encodeURIComponent(video.video_url)}`;
+      
+      // Try to open Instagram, fallback to web
+      window.open(instagramUrl, '_blank');
+      
+      // Also copy link
+      await navigator.clipboard.writeText(window.location.origin + `/?v=${video.id}`);
+      toast.success('Link copied! Paste in Instagram');
+    } catch (error) {
+      toast.error('Copy the link and share on Instagram');
+    }
+  };
+
+  const handleShareToSnapchat = async () => {
+    try {
+      await axios.post(`${API}/videos/${video.id}/share`);
+      setSharesCount(prev => prev + 1);
+      
+      const shareUrl = window.location.origin + `/?v=${video.id}`;
+      const snapchatUrl = `https://www.snapchat.com/share?url=${encodeURIComponent(shareUrl)}`;
+      
+      window.open(snapchatUrl, '_blank');
+      toast.success('Opening Snapchat...');
+    } catch (error) {
+      toast.error('Failed to share');
+    }
+  };
+
+  const handleShareToWhatsApp = async () => {
+    try {
+      await axios.post(`${API}/videos/${video.id}/share`);
+      setSharesCount(prev => prev + 1);
+      
+      const shareUrl = window.location.origin + `/?v=${video.id}`;
+      const text = `Check out this video on Fun Video App: ${video.caption}`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text + '\n' + shareUrl)}`;
+      
+      window.open(whatsappUrl, '_blank');
+    } catch (error) {
+      toast.error('Failed to share');
+    }
+  };
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      toast.info('Downloading video...');
+      
+      // Fetch video as blob
+      const response = await fetch(video.video_url);
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `funvideo_${video.id}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Video downloaded!');
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: open video in new tab
+      window.open(video.video_url, '_blank');
+      toast.info('Video opened in new tab - long press to save');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + `/?v=${video.id}`);
+      toast.success('Link copied!');
+    } catch (error) {
+      toast.error('Failed to copy link');
     }
   };
 
