@@ -257,7 +257,7 @@ export default function UploadPage() {
 
         {/* Video Preview */}
         {previewUrl ? (
-          <div className="relative aspect-[9/16] max-h-[400px] mx-auto rounded-2xl overflow-hidden bg-zinc-900">
+          <div className="relative aspect-[9/16] max-h-[350px] mx-auto rounded-2xl overflow-hidden bg-zinc-900">
             <video
               ref={videoRef}
               src={previewUrl}
@@ -273,6 +273,13 @@ export default function UploadPage() {
             >
               <X className="w-4 h-4" />
             </button>
+            
+            {/* File Size Badge */}
+            {selectedFile && (
+              <div className="absolute top-3 left-3 px-3 py-1 rounded-full bg-black/70 text-xs font-medium">
+                {formatFileSize(fileSize)}
+              </div>
+            )}
           </div>
         ) : (
           <div 
