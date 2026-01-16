@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
-import { Heart, MessageCircle, Share2, Play, Pause, Volume2, VolumeX, Music } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Play, Pause, Volume2, VolumeX, Music, Download, Instagram, Send } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import CommentModal from './CommentModal';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
