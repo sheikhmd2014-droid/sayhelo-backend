@@ -358,12 +358,14 @@ export default function VideoCard({ video, isActive, onLikeUpdate }) {
       </div>
 
       {/* Comments Modal */}
-      <CommentModal
-        isOpen={showComments}
-        onClose={() => setShowComments(false)}
-        videoId={video.id}
-        onCommentAdded={() => setCommentsCount(prev => prev + 1)}
-      />
+      <Suspense fallback={null}>
+        <CommentModal
+          isOpen={showComments}
+          onClose={() => setShowComments(false)}
+          videoId={video.id}
+          onCommentAdded={() => setCommentsCount(prev => prev + 1)}
+        />
+      </Suspense>
 
       {/* Share Modal */}
       <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
