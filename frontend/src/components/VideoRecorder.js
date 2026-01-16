@@ -3,8 +3,22 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { 
   X, Camera, Video, SwitchCamera, Circle, Square, 
-  Check, RotateCcw, Pause, Play, Timer
+  Check, RotateCcw, Pause, Play, Timer, Sparkles,
+  Sun, Moon, Zap, Heart, Star, Flame
 } from 'lucide-react';
+
+// Camera Filters
+const FILTERS = [
+  { id: 'normal', name: 'Normal', style: '', icon: Circle },
+  { id: 'warm', name: 'Warm', style: 'sepia(30%) saturate(140%)', icon: Sun },
+  { id: 'cool', name: 'Cool', style: 'hue-rotate(30deg) saturate(110%)', icon: Moon },
+  { id: 'vintage', name: 'Vintage', style: 'sepia(50%) contrast(90%) brightness(90%)', icon: Star },
+  { id: 'bw', name: 'B&W', style: 'grayscale(100%)', icon: Circle },
+  { id: 'vivid', name: 'Vivid', style: 'saturate(180%) contrast(110%)', icon: Zap },
+  { id: 'dramatic', name: 'Drama', style: 'contrast(130%) brightness(90%)', icon: Flame },
+  { id: 'soft', name: 'Soft', style: 'brightness(105%) contrast(95%) saturate(90%)', icon: Heart },
+  { id: 'neon', name: 'Neon', style: 'saturate(200%) brightness(110%) contrast(120%)', icon: Sparkles },
+];
 
 export default function VideoRecorder({ onVideoRecorded, onClose }) {
   const [isRecording, setIsRecording] = useState(false);
