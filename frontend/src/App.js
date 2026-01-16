@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import AuthPage from "./pages/AuthPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import FeedPage from "./pages/FeedPage";
 import ProfilePage from "./pages/ProfilePage";
 import UploadPage from "./pages/UploadPage";
@@ -59,6 +60,10 @@ function AppContent() {
               <AuthPage />
             </PublicRoute>
           }
+        />
+        <Route
+          path="/forgot-password"
+          element={<ForgotPasswordPage />}
         />
         <Route
           path="/"
