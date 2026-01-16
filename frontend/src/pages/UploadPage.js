@@ -105,8 +105,16 @@ export default function UploadPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!videoUrl) {
-      toast.error('Please provide a video URL');
+    let finalVideoUrl = videoUrl;
+    
+    // If file mode and file selected, upload first
+    if (uploadMode === 'file' && selectedFile) {
+      finalVideoUrl = await uploadVideoFile();
+      if (!finalVideoUrl) return;
+    }
+    
+    if (!finalVideoUrl) {
+      toast.error('Please provide a video');
       return;
     }
     
@@ -120,7 +128,7 @@ export default function UploadPage() {
       await axios.post(
         `${API}/videos`,
         {
-          video_url: videoUrl,
+          video_url: finalVideoUrl,
           thumbnail_url: thumbnailUrl || null,
           caption: caption.trim()
         },
@@ -140,6 +148,10 @@ export default function UploadPage() {
     setVideoUrl('');
     setThumbnailUrl('');
     setPreviewUrl('');
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
