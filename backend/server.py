@@ -144,6 +144,10 @@ class AdminStatsResponse(BaseModel):
     users_today: int
     videos_today: int
 
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
@@ -701,6 +705,22 @@ async def admin_delete_comment(comment_id: str, admin: dict = Depends(get_admin_
     await db.videos.update_one({"id": comment['video_id']}, {"$inc": {"comments_count": -1}})
     
     return {"message": "Comment deleted"}
+
+@api_router.put("/admin/change-password")
+async def change_admin_password(data: ChangePasswordRequest, admin: dict = Depends(get_admin_user)):
+    # Verify current password
+    user = await db.users.find_one({"id": admin['id']}, {"_id": 0})
+    if not verify_password(data.current_password, user['password']):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Update password
+    new_hashed = hash_password(data.new_password)
+    await db.users.update_one({"id": admin['id']}, {"$set": {"password": new_hashed}})
+    
+    return {"message": "Password changed successfully"}
 
 # Include router and middleware
 app.include_router(api_router)
