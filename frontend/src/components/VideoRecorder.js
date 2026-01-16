@@ -323,23 +323,71 @@ export default function VideoRecorder({ onVideoRecorded, onClose }) {
           </div>
         )}
         
-        <button 
-          onClick={switchCamera}
-          disabled={isRecording}
-          className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center disabled:opacity-50"
-        >
-          <SwitchCamera className="w-6 h-6" />
-        </button>
+        <div className="flex gap-2">
+          {/* Beauty Mode */}
+          <button 
+            onClick={() => setBeautyMode(!beautyMode)}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+              beautyMode ? 'bg-pink-500' : 'bg-black/50'
+            }`}
+          >
+            <Sparkles className="w-5 h-5" />
+          </button>
+          
+          {/* Switch Camera */}
+          <button 
+            onClick={switchCamera}
+            disabled={isRecording}
+            className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center disabled:opacity-50"
+          >
+            <SwitchCamera className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {/* Camera Preview */}
+      {/* Camera Preview with Filter */}
       <video
         ref={videoRef}
         autoPlay
         playsInline
         muted
         className={`flex-1 object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
+        style={{ filter: getFilterStyle() }}
       />
+
+      {/* Flash overlay for effect */}
+      {flashMode && (
+        <div className="absolute inset-0 bg-white/20 pointer-events-none animate-pulse" />
+      )}
+
+      {/* Filters Strip */}
+      <div className="absolute bottom-36 left-0 right-0 px-2">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {FILTERS.map((filter) => {
+            const Icon = filter.icon;
+            return (
+              <button
+                key={filter.id}
+                onClick={() => setSelectedFilter(filter.id)}
+                className={`flex flex-col items-center gap-1 p-2 rounded-xl min-w-[60px] transition-all ${
+                  selectedFilter === filter.id 
+                    ? 'bg-white/20 scale-105' 
+                    : 'bg-black/30'
+                }`}
+              >
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  selectedFilter === filter.id 
+                    ? 'bg-gradient-to-br from-fuchsia-500 to-violet-600' 
+                    : 'bg-zinc-700'
+                }`}>
+                  <Icon className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-[10px] text-white">{filter.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Recording Controls */}
       <div className="absolute bottom-0 left-0 right-0 p-8 flex items-center justify-center gap-8">
@@ -388,8 +436,8 @@ export default function VideoRecorder({ onVideoRecorded, onClose }) {
 
       {/* Instructions */}
       {!isRecording && (
-        <div className="absolute bottom-32 left-0 right-0 text-center">
-          <p className="text-zinc-400 text-sm">Tap to record (max 60 sec)</p>
+        <div className="absolute bottom-32 left-0 right-0 text-center pointer-events-none">
+          <p className="text-white/70 text-sm">Hold to record • Swipe for filters</p>
         </div>
       )}
     </div>
