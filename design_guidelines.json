@@ -1,0 +1,134 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Electric Midnight",
+      "archetype": "Electric & Neon",
+      "vibe": "Immersive, Kinetic, Addictive",
+      "core_philosophy": "Content is the light source. The UI is the shadow."
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Unbounded, sans-serif",
+        "body": "Plus Jakarta Sans, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      ],
+      "usage": {
+        "h1": "font-unbounded font-black text-4xl tracking-tighter uppercase",
+        "h2": "font-unbounded font-bold text-2xl tracking-tight",
+        "h3": "font-unbounded font-semibold text-xl",
+        "body": "font-body text-base leading-relaxed text-zinc-300",
+        "caption": "font-body text-xs font-medium tracking-wide text-zinc-500 uppercase"
+      }
+    },
+    "colors": {
+      "palette": {
+        "background": "#000000",
+        "foreground": "#FFFFFF",
+        "card": "#09090B",
+        "card_foreground": "#FAFAFA",
+        "primary": "#D946EF",
+        "primary_foreground": "#FFFFFF",
+        "secondary": "#22C55E",
+        "secondary_foreground": "#000000",
+        "muted": "#27272A",
+        "muted_foreground": "#A1A1AA",
+        "accent": "#8B5CF6",
+        "accent_foreground": "#FFFFFF",
+        "border": "#27272A",
+        "input": "#27272A",
+        "ring": "#D946EF"
+      },
+      "gradients": {
+        "brand": "bg-gradient-to-r from-fuchsia-500 to-violet-600",
+        "overlay": "bg-gradient-to-t from-black/90 via-black/40 to-transparent",
+        "glow": "shadow-[0_0_20px_rgba(217,70,239,0.5)]"
+      }
+    },
+    "layout": {
+      "spacing": {
+        "container_padding": "p-4 md:p-8",
+        "section_gap": "gap-8 md:gap-16"
+      },
+      "grid_system": {
+        "feed": "flex flex-col h-[100dvh] overflow-y-scroll snap-y snap-mandatory scrollbar-hide",
+        "profile": "grid grid-cols-3 gap-1 md:gap-4",
+        "desktop_layout": "grid grid-cols-1 md:grid-cols-[240px_1fr_350px] h-screen max-w-[1600px] mx-auto"
+      },
+      "border_radius": {
+        "default": "rounded-xl",
+        "card": "rounded-2xl",
+        "button": "rounded-full"
+      }
+    },
+    "components": {
+      "buttons": {
+        "primary": "bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 rounded-full font-semibold transition-transform active:scale-95",
+        "ghost": "hover:bg-white/10 text-white h-10 w-10 rounded-full flex items-center justify-center transition-colors",
+        "outline": "border border-white/20 bg-transparent hover:bg-white/10 text-white h-10 px-6 rounded-full"
+      },
+      "cards": {
+        "video_card": "relative w-full h-full snap-start bg-black overflow-hidden",
+        "glass_panel": "bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl"
+      },
+      "inputs": {
+        "default": "bg-zinc-900/50 border-zinc-800 focus:border-primary focus:ring-primary/20 rounded-xl h-12 px-4 text-white placeholder:text-zinc-600"
+      }
+    },
+    "motion": {
+      "library": "framer-motion",
+      "animations": {
+        "page_transition": {
+          "initial": { "opacity": 0, "y": 20 },
+          "animate": { "opacity": 1, "y": 0 },
+          "exit": { "opacity": 0, "y": -20 },
+          "transition": { "duration": 0.3, "ease": "easeOut" }
+        },
+        "like_heart": {
+          "scale": [1, 1.5, 1],
+          "rotate": [0, 15, -15, 0],
+          "transition": { "duration": 0.4 }
+        },
+        "swipe_hint": {
+          "y": [0, -10, 0],
+          "transition": { "repeat": "Infinity", "duration": 1.5 }
+        }
+      }
+    },
+    "assets": {
+      "icons": "lucide-react",
+      "images": {
+        "avatars": [
+          "https://images.unsplash.com/photo-1580046939256-c377c5b099f1?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "https://images.unsplash.com/photo-1663180575882-14b137d1bbf7?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "https://images.unsplash.com/photo-1576348076752-6085814e5a51?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "https://images.unsplash.com/photo-1677212004257-103cfa6b59d0?crop=entropy&cs=srgb&fm=jpg&q=85"
+        ],
+        "video_thumbnails": [
+          "https://images.unsplash.com/photo-1576425992375-833883be0039?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "https://images.unsplash.com/photo-1730483385242-f8e95e412ec3?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "https://images.unsplash.com/photo-1634007530041-914b5c56c69e?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "https://images.unsplash.com/photo-1744477825395-e43544c2e2cc?crop=entropy&cs=srgb&fm=jpg&q=85"
+        ]
+      }
+    },
+    "instructions_to_main_agent": [
+      "1. THEME SETUP: Update `tailwind.config.js` to use the 'Electric Midnight' color palette. Override the default shadcn colors in `index.css` with the hex codes provided.",
+      "2. FONT SETUP: Add the Google Fonts import to `index.css` immediately. Apply `font-unbounded` to all headings and `font-body` to all text.",
+      "3. LAYOUT: The 'For You' page MUST be `h-[100dvh]` (dynamic viewport height) to prevent mobile browser bar issues. Use `snap-y snap-mandatory` for the TikTok-like scroll.",
+      "4. VIDEO PLAYER: Do not use a default HTML5 video player control bar. Build custom overlay controls (Play/Pause on tap, Mute toggle, Progress bar at bottom).",
+      "5. GLASSMORPHISM: Use the `glass_panel` class for the Comment Modal and Share Sheet. It must feel like a premium layer on top of the video.",
+      "6. MOBILE FIRST: Design for mobile first. On desktop, center the video feed (max-width 450px) and use the extra space for navigation and discovery, or use a 3-column layout.",
+      "7. NO WHITE BACKGROUNDS: The app is strictly dark mode. Never use white backgrounds for containers. Use `bg-zinc-900` or `bg-black`.",
+      "8. DATA-TESTID: Add `data-testid` to all interactive elements (e.g., `like-button`, `comment-input`, `login-submit`)."
+    ],
+    "universal_guidelines": [
+      "Avoid 'AI Slop': Do not use generic gradients or centered layouts.",
+      "Micro-interactions: Every button press must have a scale effect (`active:scale-95`).",
+      "Spacing: Use generous padding inside containers, but keep the video feed edge-to-edge.",
+      "Accessibility: Ensure text on top of videos has a text-shadow or a subtle gradient overlay for readability."
+    ]
+  }
+}
