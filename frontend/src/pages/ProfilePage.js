@@ -9,7 +9,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { ArrowLeft, Grid3X3, Heart, Settings, LogOut, Play, Edit, Camera } from 'lucide-react';
+import { ArrowLeft, Grid3X3, Heart, Settings, LogOut, Play, Edit, Camera, QrCode, Share2 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -248,21 +248,32 @@ export default function ProfilePage() {
 
           {/* Actions */}
           {isOwnProfile ? (
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3">
+              <div className="flex gap-3">
+                <Button
+                  onClick={openEditModal}
+                  className="flex-1 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 font-semibold active-scale"
+                  data-testid="edit-profile-button"
+                >
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
+                <Button
+                  onClick={() => navigate('/upload')}
+                  className="flex-1 h-10 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 hover:from-fuchsia-600 hover:to-violet-700 font-semibold active-scale"
+                  data-testid="add-video-button"
+                >
+                  + Add Video
+                </Button>
+              </div>
               <Button
-                onClick={openEditModal}
-                className="px-6 h-10 rounded-full bg-zinc-800 hover:bg-zinc-700 font-semibold active-scale"
-                data-testid="edit-profile-button"
+                onClick={() => navigate('/qr-code')}
+                variant="outline"
+                className="h-10 rounded-full border-zinc-700 hover:bg-zinc-800 font-semibold"
+                data-testid="share-app-button"
               >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Profile
-              </Button>
-              <Button
-                onClick={() => navigate('/upload')}
-                className="px-6 h-10 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 hover:from-fuchsia-600 hover:to-violet-700 font-semibold active-scale"
-                data-testid="add-video-button"
-              >
-                + Add Video
+                <QrCode className="w-4 h-4 mr-2" />
+                Share App / QR Code
               </Button>
             </div>
           ) : (
