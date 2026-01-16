@@ -11,7 +11,7 @@ from datetime import datetime
 import uuid
 
 class TikVerseAPITester:
-    def __init__(self, base_url="https://tikverse-4.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://tiktok-clone-755.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.user_id = None
