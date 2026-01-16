@@ -348,7 +348,10 @@ export default function UploadPage() {
               </div>
             )}
           </div>
-        ) : (
+        )}
+        
+        {/* Empty state for file mode */}
+        {uploadMode === 'file' && !previewUrl && (
           <div 
             onClick={() => uploadMode === 'file' && fileInputRef.current?.click()}
             className={`aspect-[9/16] max-h-[300px] mx-auto rounded-2xl border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center gap-4 bg-zinc-900/50 ${uploadMode === 'file' ? 'cursor-pointer hover:border-fuchsia-500 transition-colors' : ''}`}
