@@ -113,6 +113,48 @@ export default function ProfilePage() {
     toast.success('Logged out successfully');
   };
 
+  const openEditModal = () => {
+    setEditData({
+      username: profile?.username || '',
+      bio: profile?.bio || '',
+      avatar: profile?.avatar || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editData.username.trim()) {
+      toast.error('Username is required');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const response = await axios.put(`${API}/users/profile`, editData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setProfile(response.data);
+      updateUser(response.data);
+      setShowEditModal(false);
+      toast.success('Profile updated!');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const avatarOptions = [
+    `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.username}`,
+    `https://api.dicebear.com/7.x/bottts/svg?seed=${profile?.username}`,
+    `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${profile?.username}`,
+    `https://api.dicebear.com/7.x/lorelei/svg?seed=${profile?.username}`,
+    `https://api.dicebear.com/7.x/micah/svg?seed=${profile?.username}`,
+    `https://api.dicebear.com/7.x/notionists/svg?seed=${profile?.username}`,
+    `https://api.dicebear.com/7.x/personas/svg?seed=${profile?.username}`,
+    `https://api.dicebear.com/7.x/pixel-art/svg?seed=${profile?.username}`,
+  ];
+
   const formatCount = (count) => {
     if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M';
     if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
