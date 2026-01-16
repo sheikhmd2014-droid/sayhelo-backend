@@ -4,9 +4,12 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { ArrowLeft, Grid3X3, Heart, Settings, LogOut, Play } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import { ArrowLeft, Grid3X3, Heart, Settings, LogOut, Play, Edit, Camera } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
