@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
@@ -6,6 +6,9 @@ import VideoCard from '../components/VideoCard';
 import { Play } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+
+// Memoized VideoCard to prevent unnecessary re-renders
+const MemoizedVideoCard = memo(VideoCard);
 
 export default function FeedPage() {
   const [videos, setVideos] = useState([]);
