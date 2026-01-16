@@ -317,6 +317,38 @@ export default function UploadPage() {
           data-testid="video-file-input"
         />
 
+        {/* File Size Warning & Tips - Show when file is large */}
+        {selectedFile && fileSize > 20 * 1024 * 1024 && (
+          <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                <Film className="w-4 h-4 text-yellow-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-yellow-500 font-medium text-sm">Large Video ({formatFileSize(fileSize)})</p>
+                <p className="text-zinc-400 text-xs mt-1">
+                  Upload time depends on your internet. Tips:
+                </p>
+                <ul className="text-zinc-500 text-xs mt-2 space-y-1">
+                  <li>• Trim video to reduce size</li>
+                  <li>• Use WiFi for faster upload</li>
+                  <li>• Max recommended: 50MB</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success message for good size */}
+        {selectedFile && fileSize <= 20 * 1024 * 1024 && (
+          <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-green-500/20 flex items-center justify-center">
+              <Film className="w-3 h-3 text-green-500" />
+            </div>
+            <p className="text-green-500 text-sm">Good size! ({formatFileSize(fileSize)}) Ready to upload</p>
+          </div>
+        )}
+
         {/* URL Mode - Video URL Input */}
         {uploadMode === 'url' && (
           <>
