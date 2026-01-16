@@ -28,6 +28,10 @@ export default function VideoRecorder({ onVideoRecorded, onClose }) {
   const [facingMode, setFacingMode] = useState('user'); // 'user' = front, 'environment' = back
   const [recordingTime, setRecordingTime] = useState(0);
   const [hasPermission, setHasPermission] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState('normal');
+  const [showFilters, setShowFilters] = useState(true);
+  const [beautyMode, setBeautyMode] = useState(false);
+  const [flashMode, setFlashMode] = useState(false);
   
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
