@@ -257,6 +257,72 @@ async def login(user_data: UserLogin):
 async def get_me(current_user: dict = Depends(get_current_user)):
     return UserResponse(**{k: v for k, v in current_user.items() if k != 'password'})
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: ForgotPasswordRequest):
+    user = await db.users.find_one({"email": data.email}, {"_id": 0})
+    if not user:
+        # Don't reveal if email exists or not for security
+        return {"message": "If email exists, reset code has been generated", "success": True}
+    
+    # Generate 6-digit reset code
+    import random
+    reset_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
+    # Store reset code with expiry (15 minutes)
+    expiry = datetime.now(timezone.utc) + timedelta(minutes=15)
+    await db.password_resets.delete_many({"email": data.email})  # Remove old codes
+    await db.password_resets.insert_one({
+        "email": data.email,
+        "code": reset_code,
+        "expires_at": expiry.isoformat(),
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # In production, send email here
+    # For now, return the code (ONLY FOR DEMO - remove in production)
+    return {
+        "message": "Reset code generated", 
+        "success": True,
+        "reset_code": reset_code,  # DEMO ONLY - In production, send via email
+        "expires_in": "15 minutes"
+    }
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: ResetPasswordRequest):
+    # Find reset code
+    reset_entry = await db.password_resets.find_one({
+        "email": data.email,
+        "code": data.reset_code
+    }, {"_id": 0})
+    
+    if not reset_entry:
+        raise HTTPException(status_code=400, detail="Invalid reset code")
+    
+    # Check expiry
+    expiry = datetime.fromisoformat(reset_entry['expires_at'].replace('Z', '+00:00'))
+    if datetime.now(timezone.utc) > expiry:
+        await db.password_resets.delete_one({"email": data.email})
+        raise HTTPException(status_code=400, detail="Reset code expired")
+    
+    # Validate new password
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    
+    # Update password
+    new_hashed = hash_password(data.new_password)
+    result = await db.users.update_one(
+        {"email": data.email},
+        {"$set": {"password": new_hashed}}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=400, detail="Failed to update password")
+    
+    # Delete used reset code
+    await db.password_resets.delete_one({"email": data.email})
+    
+    return {"message": "Password reset successfully", "success": True}
+
 # ==================== USER ROUTES ====================
 
 @api_router.get("/users/{user_id}", response_model=UserResponse)
