@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { ScrollArea } from '../components/ui/scroll-area';
 import { 
   Shield, Users, Video, MessageSquare, BarChart3, LogOut, 
-  Ban, Trash2, CheckCircle, XCircle, Search, UserCog, Play
+  Ban, Trash2, CheckCircle, XCircle, Search, UserCog, Play, Settings, Key
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -22,6 +22,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
+  const [changingPassword, setChangingPassword] = useState(false);
   const navigate = useNavigate();
 
   const adminToken = localStorage.getItem('adminToken');
@@ -135,6 +137,33 @@ export default function AdminDashboard() {
     }
   };
 
+  // Password Change
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (passwordData.new !== passwordData.confirm) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    if (passwordData.new.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await axios.put(`${API}/admin/change-password`, {
+        current_password: passwordData.current,
+        new_password: passwordData.new
+      }, { headers: getHeaders() });
+      toast.success('Password changed successfully!');
+      setPasswordData({ current: '', new: '', confirm: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to change password');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
       month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -187,7 +216,7 @@ export default function AdminDashboard() {
 
       <div className="max-w-7xl mx-auto p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full bg-zinc-900/50 rounded-xl p-1 mb-6 grid grid-cols-4 gap-1">
+          <TabsList className="w-full bg-zinc-900/50 rounded-xl p-1 mb-6 grid grid-cols-5 gap-1">
             <TabsTrigger value="dashboard" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-orange-600" data-testid="tab-dashboard">
               <BarChart3 className="w-4 h-4 mr-2" />
               Dashboard
@@ -203,6 +232,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="comments" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-orange-600" data-testid="tab-comments">
               <MessageSquare className="w-4 h-4 mr-2" />
               Comments
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-orange-600" data-testid="tab-settings">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -403,6 +436,76 @@ export default function AdminDashboard() {
                 ))}
               </div>
             </ScrollArea>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="max-w-md">
+              <div className="rounded-xl bg-zinc-900/50 border border-zinc-800 p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
+                    <Key className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Change Password</h3>
+                    <p className="text-xs text-zinc-500">Update your admin password</p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleChangePassword} className="space-y-4">
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-2">Current Password</label>
+                    <Input
+                      type="password"
+                      value={passwordData.current}
+                      onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })}
+                      className="bg-zinc-800 border-zinc-700 h-11 rounded-xl"
+                      placeholder="Enter current password"
+                      required
+                      data-testid="current-password"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-2">New Password</label>
+                    <Input
+                      type="password"
+                      value={passwordData.new}
+                      onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })}
+                      className="bg-zinc-800 border-zinc-700 h-11 rounded-xl"
+                      placeholder="Enter new password"
+                      required
+                      minLength={6}
+                      data-testid="new-password"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-2">Confirm New Password</label>
+                    <Input
+                      type="password"
+                      value={passwordData.confirm}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+                      className="bg-zinc-800 border-zinc-700 h-11 rounded-xl"
+                      placeholder="Confirm new password"
+                      required
+                      minLength={6}
+                      data-testid="confirm-password"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={changingPassword}
+                    className="w-full h-11 rounded-xl bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700"
+                    data-testid="change-password-btn"
+                  >
+                    {changingPassword ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      'Change Password'
+                    )}
+                  </Button>
+                </form>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
