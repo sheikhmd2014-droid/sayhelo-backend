@@ -172,6 +172,34 @@ export default function UploadPage() {
       </div>
 
       <div className="max-w-lg mx-auto p-4 space-y-6">
+        {/* Upload Mode Toggle */}
+        <div className="flex gap-2 p-1 bg-zinc-900 rounded-full">
+          <button
+            onClick={() => { setUploadMode('file'); clearPreview(); }}
+            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
+              uploadMode === 'file' 
+                ? 'bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white' 
+                : 'text-zinc-400 hover:text-white'
+            }`}
+            data-testid="mode-file"
+          >
+            <Film className="w-4 h-4 inline mr-2" />
+            Upload Video
+          </button>
+          <button
+            onClick={() => { setUploadMode('url'); clearPreview(); }}
+            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
+              uploadMode === 'url' 
+                ? 'bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white' 
+                : 'text-zinc-400 hover:text-white'
+            }`}
+            data-testid="mode-url"
+          >
+            <LinkIcon className="w-4 h-4 inline mr-2" />
+            Video URL
+          </button>
+        </div>
+
         {/* Video Preview */}
         {previewUrl ? (
           <div className="relative aspect-[9/16] max-h-[400px] mx-auto rounded-2xl overflow-hidden bg-zinc-900">
@@ -192,60 +220,90 @@ export default function UploadPage() {
             </button>
           </div>
         ) : (
-          <div className="aspect-[9/16] max-h-[300px] mx-auto rounded-2xl border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center gap-4 bg-zinc-900/50">
+          <div 
+            onClick={() => uploadMode === 'file' && fileInputRef.current?.click()}
+            className={`aspect-[9/16] max-h-[300px] mx-auto rounded-2xl border-2 border-dashed border-zinc-700 flex flex-col items-center justify-center gap-4 bg-zinc-900/50 ${uploadMode === 'file' ? 'cursor-pointer hover:border-fuchsia-500 transition-colors' : ''}`}
+          >
             <div className="w-16 h-16 rounded-full bg-zinc-800 flex items-center justify-center">
               <Video className="w-8 h-8 text-zinc-500" />
             </div>
             <p className="text-zinc-500 text-sm text-center px-4">
-              Select a sample video or paste a video URL below
+              {uploadMode === 'file' 
+                ? 'Tap to select video from your device' 
+                : 'Paste a video URL below'}
             </p>
+            {uploadMode === 'file' && (
+              <Button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                className="rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600"
+                data-testid="select-video-btn"
+              >
+                Select Video
+              </Button>
+            )}
           </div>
         )}
 
-        {/* Sample Videos */}
-        <div className="space-y-3">
-          <Label className="text-zinc-400 text-sm">Quick Select (Sample Videos)</Label>
-          <div className="grid grid-cols-4 gap-2">
-            {SAMPLE_VIDEOS.map((sample, index) => (
-              <button
-                key={index}
-                onClick={() => handleSelectSample(sample)}
-                className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all active-scale ${
-                  videoUrl === sample.url 
-                    ? 'border-primary glow-primary' 
-                    : 'border-transparent hover:border-zinc-700'
-                }`}
-                data-testid={`sample-video-${index}`}
-              >
-                <img
-                  src={sample.thumbnail}
-                  alt={sample.label}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-end p-1">
-                  <span className="text-[10px] font-medium truncate">{sample.label}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="video/*"
+          onChange={handleFileSelect}
+          className="hidden"
+          data-testid="video-file-input"
+        />
 
-        {/* Video URL Input */}
-        <div className="space-y-2">
-          <Label htmlFor="videoUrl" className="text-zinc-400">
-            <LinkIcon className="w-4 h-4 inline mr-2" />
-            Video URL
-          </Label>
-          <Input
-            id="videoUrl"
-            type="url"
-            placeholder="https://example.com/video.mp4"
-            value={videoUrl}
-            onChange={(e) => handleUrlChange(e.target.value)}
-            className="bg-zinc-900/50 border-zinc-800 focus:border-primary h-12 rounded-xl"
-            data-testid="video-url-input"
-          />
-        </div>
+        {/* URL Mode - Video URL Input */}
+        {uploadMode === 'url' && (
+          <>
+            {/* Sample Videos */}
+            <div className="space-y-3">
+              <Label className="text-zinc-400 text-sm">Quick Select (Sample Videos)</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {SAMPLE_VIDEOS.map((sample, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectSample(sample)}
+                    className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all active-scale ${
+                      videoUrl === sample.url 
+                        ? 'border-primary glow-primary' 
+                        : 'border-transparent hover:border-zinc-700'
+                    }`}
+                    data-testid={`sample-video-${index}`}
+                  >
+                    <img
+                      src={sample.thumbnail}
+                      alt={sample.label}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-end p-1">
+                      <span className="text-[10px] font-medium truncate">{sample.label}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Video URL Input */}
+            <div className="space-y-2">
+              <Label htmlFor="videoUrl" className="text-zinc-400">
+                <LinkIcon className="w-4 h-4 inline mr-2" />
+                Video URL
+              </Label>
+              <Input
+                id="videoUrl"
+                type="url"
+                placeholder="https://example.com/video.mp4"
+                value={videoUrl}
+                onChange={(e) => handleUrlChange(e.target.value)}
+                className="bg-zinc-900/50 border-zinc-800 focus:border-primary h-12 rounded-xl"
+                data-testid="video-url-input"
+              />
+            </div>
+          </>
+        )}
 
         {/* Caption */}
         <div className="space-y-2">
