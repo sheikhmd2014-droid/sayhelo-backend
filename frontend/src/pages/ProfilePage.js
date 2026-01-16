@@ -21,7 +21,10 @@ export default function ProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
-  const { user, token, logout } = useAuth();
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({ username: '', bio: '', avatar: '' });
+  const [saving, setSaving] = useState(false);
+  const { user, token, logout, updateUser } = useAuth();
   const navigate = useNavigate();
 
   const isOwnProfile = user?.id === userId;
