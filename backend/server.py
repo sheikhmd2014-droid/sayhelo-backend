@@ -156,6 +156,14 @@ class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    email: str
+    reset_code: str
+    new_password: str
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
