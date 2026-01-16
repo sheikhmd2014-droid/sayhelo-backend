@@ -517,7 +517,7 @@ async def search_videos(q: str, limit: int = 20, current_user: Optional[dict] = 
 
 @api_router.get("/")
 async def root():
-    return {"message": "TikVerse API is running"}
+    return {"message": "Fun Video App API is running"}
 
 @api_router.get("/health")
 async def health():
@@ -573,7 +573,7 @@ async def create_admin():
         "email": "admin@tikverse.com",
         "password": hash_password("admin123"),
         "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
-        "bio": "TikVerse Administrator",
+        "bio": "Fun Video App Administrator",
         "followers_count": 0,
         "following_count": 0,
         "is_banned": False,

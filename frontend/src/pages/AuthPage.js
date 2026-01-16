@@ -56,9 +56,9 @@ export default function AuthPage() {
           </div>
         </div>
         <h1 className="font-unbounded font-black text-4xl tracking-tighter uppercase bg-gradient-to-r from-fuchsia-500 to-violet-500 bg-clip-text text-transparent">
-          TikVerse
+          Fun Video
         </h1>
-        <p className="text-zinc-500 text-sm mt-2">Short videos, infinite vibes</p>
+        <p className="text-zinc-500 text-sm mt-2">Watch, Create & Share Fun Videos</p>
       </div>
 
       {/* Auth Card */}
