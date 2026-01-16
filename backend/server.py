@@ -523,6 +523,185 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
+# ==================== ADMIN HELPER ====================
+
+async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+    try:
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("user_id")
+        user = await db.users.find_one({"id": user_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        if not user.get('is_admin', False):
+            raise HTTPException(status_code=403, detail="Admin access required")
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# ==================== ADMIN ROUTES ====================
+
+@api_router.post("/admin/login", response_model=TokenResponse)
+async def admin_login(admin_data: AdminLogin):
+    user = await db.users.find_one({"email": admin_data.email}, {"_id": 0})
+    if not user or not verify_password(admin_data.password, user['password']):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not user.get('is_admin', False):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    token = create_token(user['id'])
+    user_response = {k: v for k, v in user.items() if k != 'password'}
+    
+    return TokenResponse(
+        access_token=token,
+        user=UserResponse(**user_response)
+    )
+
+@api_router.post("/admin/create-admin")
+async def create_admin():
+    """Create default admin if not exists"""
+    existing = await db.users.find_one({"email": "admin@tikverse.com"})
+    if existing:
+        return {"message": "Admin already exists", "email": "admin@tikverse.com"}
+    
+    admin_id = str(uuid.uuid4())
+    admin_doc = {
+        "id": admin_id,
+        "username": "admin",
+        "email": "admin@tikverse.com",
+        "password": hash_password("admin123"),
+        "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+        "bio": "TikVerse Administrator",
+        "followers_count": 0,
+        "following_count": 0,
+        "is_banned": False,
+        "is_admin": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.users.insert_one(admin_doc)
+    return {"message": "Admin created", "email": "admin@tikverse.com", "password": "admin123"}
+
+@api_router.get("/admin/stats", response_model=AdminStatsResponse)
+async def get_admin_stats(admin: dict = Depends(get_admin_user)):
+    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    
+    total_users = await db.users.count_documents({})
+    total_videos = await db.videos.count_documents({})
+    total_likes = await db.likes.count_documents({})
+    total_comments = await db.comments.count_documents({})
+    total_follows = await db.follows.count_documents({})
+    banned_users = await db.users.count_documents({"is_banned": True})
+    pending_videos = await db.videos.count_documents({"is_approved": False})
+    users_today = await db.users.count_documents({"created_at": {"$gte": today}})
+    videos_today = await db.videos.count_documents({"created_at": {"$gte": today}})
+    
+    return AdminStatsResponse(
+        total_users=total_users,
+        total_videos=total_videos,
+        total_likes=total_likes,
+        total_comments=total_comments,
+        total_follows=total_follows,
+        banned_users=banned_users,
+        pending_videos=pending_videos,
+        users_today=users_today,
+        videos_today=videos_today
+    )
+
+@api_router.get("/admin/users", response_model=List[AdminUserResponse])
+async def get_all_users(skip: int = 0, limit: int = 50, admin: dict = Depends(get_admin_user)):
+    users = await db.users.find({}, {"_id": 0, "password": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    return [AdminUserResponse(**u) for u in users]
+
+@api_router.put("/admin/users/{user_id}/ban")
+async def ban_user(user_id: str, admin: dict = Depends(get_admin_user)):
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.get('is_admin'):
+        raise HTTPException(status_code=400, detail="Cannot ban admin")
+    
+    await db.users.update_one({"id": user_id}, {"$set": {"is_banned": True}})
+    return {"message": "User banned"}
+
+@api_router.put("/admin/users/{user_id}/unban")
+async def unban_user(user_id: str, admin: dict = Depends(get_admin_user)):
+    await db.users.update_one({"id": user_id}, {"$set": {"is_banned": False}})
+    return {"message": "User unbanned"}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user(user_id: str, admin: dict = Depends(get_admin_user)):
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.get('is_admin'):
+        raise HTTPException(status_code=400, detail="Cannot delete admin")
+    
+    # Delete user and all their data
+    await db.users.delete_one({"id": user_id})
+    await db.videos.delete_many({"user_id": user_id})
+    await db.likes.delete_many({"user_id": user_id})
+    await db.comments.delete_many({"user_id": user_id})
+    await db.follows.delete_many({"$or": [{"follower_id": user_id}, {"following_id": user_id}]})
+    
+    return {"message": "User deleted"}
+
+@api_router.put("/admin/users/{user_id}/make-admin")
+async def make_admin(user_id: str, admin: dict = Depends(get_admin_user)):
+    await db.users.update_one({"id": user_id}, {"$set": {"is_admin": True}})
+    return {"message": "User is now admin"}
+
+@api_router.put("/admin/users/{user_id}/remove-admin")
+async def remove_admin(user_id: str, admin: dict = Depends(get_admin_user)):
+    if user_id == admin['id']:
+        raise HTTPException(status_code=400, detail="Cannot remove own admin status")
+    await db.users.update_one({"id": user_id}, {"$set": {"is_admin": False}})
+    return {"message": "Admin status removed"}
+
+@api_router.get("/admin/videos", response_model=List[AdminVideoResponse])
+async def get_all_videos(skip: int = 0, limit: int = 50, admin: dict = Depends(get_admin_user)):
+    videos = await db.videos.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    return [AdminVideoResponse(**v) for v in videos]
+
+@api_router.put("/admin/videos/{video_id}/approve")
+async def approve_video(video_id: str, admin: dict = Depends(get_admin_user)):
+    await db.videos.update_one({"id": video_id}, {"$set": {"is_approved": True}})
+    return {"message": "Video approved"}
+
+@api_router.put("/admin/videos/{video_id}/reject")
+async def reject_video(video_id: str, admin: dict = Depends(get_admin_user)):
+    await db.videos.update_one({"id": video_id}, {"$set": {"is_approved": False}})
+    return {"message": "Video rejected"}
+
+@api_router.delete("/admin/videos/{video_id}")
+async def admin_delete_video(video_id: str, admin: dict = Depends(get_admin_user)):
+    video = await db.videos.find_one({"id": video_id})
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    await db.videos.delete_one({"id": video_id})
+    await db.likes.delete_many({"video_id": video_id})
+    await db.comments.delete_many({"video_id": video_id})
+    
+    return {"message": "Video deleted"}
+
+@api_router.get("/admin/comments", response_model=List[CommentResponse])
+async def get_all_comments(skip: int = 0, limit: int = 100, admin: dict = Depends(get_admin_user)):
+    comments = await db.comments.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    return [CommentResponse(**c) for c in comments]
+
+@api_router.delete("/admin/comments/{comment_id}")
+async def admin_delete_comment(comment_id: str, admin: dict = Depends(get_admin_user)):
+    comment = await db.comments.find_one({"id": comment_id})
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    
+    await db.comments.delete_one({"id": comment_id})
+    await db.videos.update_one({"id": comment['video_id']}, {"$inc": {"comments_count": -1}})
+    
+    return {"message": "Comment deleted"}
+
 # Include router and middleware
 app.include_router(api_router)
 
