@@ -1,21 +1,30 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Home, Search, PlusSquare, User } from 'lucide-react';
+import { Home, Search, PlusSquare, User, LogIn } from 'lucide-react';
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const handleNavClick = (path, requiresAuth = false) => {
+    if (requiresAuth && !user) {
+      navigate('/auth');
+    } else {
+      navigate(path);
+    }
+  };
+
   const navItems = [
-    { icon: Home, path: '/', label: 'Home' },
-    { icon: Search, path: '/search', label: 'Search' },
-    { icon: PlusSquare, path: '/upload', label: 'Upload' },
-    { icon: User, path: user ? `/profile/${user.id}` : '/auth', label: 'Profile' },
+    { icon: Home, path: '/', label: 'Home', requiresAuth: false },
+    { icon: Search, path: '/search', label: 'Search', requiresAuth: false },
+    { icon: PlusSquare, path: '/upload', label: 'Upload', requiresAuth: true },
+    { icon: user ? User : LogIn, path: user ? `/profile/${user.id}` : '/auth', label: user ? 'Profile' : 'Login', requiresAuth: false },
   ];
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
+    if (path === '/auth') return location.pathname === '/auth';
     return location.pathname.startsWith(path);
   };
 
@@ -25,10 +34,10 @@ export default function Navbar() {
       data-testid="navbar"
     >
       <div className="max-w-lg mx-auto flex justify-around items-center h-16 px-4">
-        {navItems.map(({ icon: Icon, path, label }) => (
+        {navItems.map(({ icon: Icon, path, label, requiresAuth }) => (
           <button
-            key={path}
-            onClick={() => navigate(path)}
+            key={label}
+            onClick={() => handleNavClick(path, requiresAuth)}
             className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-colors active-scale ${
               isActive(path) 
                 ? 'text-white' 
