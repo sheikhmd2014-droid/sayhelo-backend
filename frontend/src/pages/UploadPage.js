@@ -248,36 +248,62 @@ export default function UploadPage() {
       </div>
 
       <div className="max-w-lg mx-auto p-4 space-y-6">
-        {/* Upload Mode Toggle */}
-        <div className="flex gap-2 p-1 bg-zinc-900 rounded-full">
+        {/* Upload Mode Toggle - 3 options */}
+        <div className="flex gap-1 p-1 bg-zinc-900 rounded-full">
+          <button
+            onClick={() => { setUploadMode('record'); }}
+            className={`flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
+              uploadMode === 'record' 
+                ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white' 
+                : 'text-zinc-400 hover:text-white'
+            }`}
+            data-testid="mode-record"
+          >
+            <Camera className="w-4 h-4" />
+            <span className="hidden sm:inline">Record</span>
+          </button>
           <button
             onClick={() => { setUploadMode('file'); clearPreview(); }}
-            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
               uploadMode === 'file' 
                 ? 'bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white' 
                 : 'text-zinc-400 hover:text-white'
             }`}
             data-testid="mode-file"
           >
-            <Film className="w-4 h-4 inline mr-2" />
-            Upload Video
+            <Film className="w-4 h-4" />
+            <span className="hidden sm:inline">Upload</span>
           </button>
           <button
             onClick={() => { setUploadMode('url'); clearPreview(); }}
-            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-all ${
+            className={`flex-1 py-2 px-3 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-1 ${
               uploadMode === 'url' 
                 ? 'bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white' 
                 : 'text-zinc-400 hover:text-white'
             }`}
             data-testid="mode-url"
           >
-            <LinkIcon className="w-4 h-4 inline mr-2" />
-            Video URL
+            <LinkIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">URL</span>
           </button>
         </div>
 
-        {/* Video Preview */}
-        {previewUrl ? (
+        {/* Record Mode - Camera Button */}
+        {uploadMode === 'record' && !previewUrl && (
+          <div 
+            onClick={() => setShowCamera(true)}
+            className="aspect-[9/16] max-h-[350px] mx-auto rounded-2xl border-2 border-dashed border-red-500/50 flex flex-col items-center justify-center gap-4 bg-zinc-900/50 cursor-pointer hover:border-red-500 transition-colors"
+          >
+            <div className="w-20 h-20 rounded-full bg-red-500 flex items-center justify-center animate-pulse">
+              <Camera className="w-10 h-10 text-white" />
+            </div>
+            <p className="text-zinc-300 font-medium">Tap to Record Video</p>
+            <p className="text-zinc-500 text-sm">Max 60 seconds</p>
+          </div>
+        )}
+
+        {/* Video Preview - Show for all modes when video is selected */}
+        {previewUrl && (
           <div className="relative aspect-[9/16] max-h-[350px] mx-auto rounded-2xl overflow-hidden bg-zinc-900">
             <video
               ref={videoRef}
