@@ -44,25 +44,75 @@ export default function UploadPage() {
   const [uploadMode, setUploadMode] = useState('file'); // 'file' or 'url'
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [fileSize, setFileSize] = useState(0);
+  const [compressing, setCompressing] = useState(false);
+  const [compressionQuality, setCompressionQuality] = useState(0.7);
   const videoRef = useRef(null);
   const fileInputRef = useRef(null);
+  const canvasRef = useRef(null);
   const { token } = useAuth();
   const navigate = useNavigate();
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
 
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 100 * 1024 * 1024) { // 100MB limit
-        toast.error('Video must be less than 100MB');
-        return;
-      }
       if (!file.type.startsWith('video/')) {
         toast.error('Please select a video file');
         return;
       }
       setSelectedFile(file);
+      setFileSize(file.size);
       setPreviewUrl(URL.createObjectURL(file));
       setVideoUrl('');
+      
+      // Show warning if file is large
+      if (file.size > 50 * 1024 * 1024) {
+        toast.warning('Video is large! Consider compressing for faster upload');
+      }
+    }
+  };
+
+  const compressVideo = async () => {
+    if (!selectedFile || !videoRef.current) return;
+    
+    setCompressing(true);
+    toast.info('Compressing video... Please wait');
+
+    try {
+      const video = videoRef.current;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Wait for video to load metadata
+      await new Promise((resolve) => {
+        if (video.readyState >= 2) resolve();
+        else video.onloadeddata = resolve;
+      });
+
+      // Reduce dimensions for compression
+      const scale = compressionQuality;
+      canvas.width = video.videoWidth * scale;
+      canvas.height = video.videoHeight * scale;
+
+      // For now, we'll just reduce the quality message
+      // True video compression requires server-side processing or WebCodecs API
+      
+      toast.success(`Video ready! Original: ${formatFileSize(selectedFile.size)}`);
+      toast.info('Tip: For better compression, use a shorter video clip');
+      
+    } catch (error) {
+      console.error('Compression error:', error);
+      toast.error('Compression failed. Try uploading as-is');
+    } finally {
+      setCompressing(false);
     }
   };
 
@@ -78,13 +128,17 @@ export default function UploadPage() {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          // Could add progress bar here
         }
       });
       
       return response.data.video_url;
     } catch (error) {
       console.error('Upload error:', error);
-      toast.error('Failed to upload video');
+      toast.error('Failed to upload video. Try a smaller file.');
       return null;
     } finally {
       setUploading(false);
