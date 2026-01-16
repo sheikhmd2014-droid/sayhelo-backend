@@ -463,6 +463,15 @@ export default function UploadPage() {
           )}
         </Button>
       </div>
+
+      {/* Video Editor Modal */}
+      {showEditor && selectedFile && (
+        <VideoEditor
+          videoFile={selectedFile}
+          onSave={handleEditorSave}
+          onCancel={handleEditorCancel}
+        />
+      )}
     </div>
   );
 }
