@@ -99,6 +99,18 @@ export default function VideoRecorder({ onVideoRecorded, onClose }) {
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
+  const getFilterStyle = () => {
+    const filter = FILTERS.find(f => f.id === selectedFilter);
+    let style = filter?.style || '';
+    
+    // Add beauty mode (blur + brightness)
+    if (beautyMode) {
+      style += ' blur(0.5px) brightness(105%) contrast(95%)';
+    }
+    
+    return style;
+  };
+
   const startRecording = () => {
     if (!streamRef.current) {
       toast.error('Camera not ready');
