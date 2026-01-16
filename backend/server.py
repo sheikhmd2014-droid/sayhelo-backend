@@ -535,6 +535,43 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
+# ==================== FILE UPLOAD ====================
+
+@api_router.post("/upload/video")
+async def upload_video_file(
+    video: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
+):
+    # Validate file type
+    if not video.content_type.startswith('video/'):
+        raise HTTPException(status_code=400, detail="File must be a video")
+    
+    # Generate unique filename
+    file_ext = video.filename.split('.')[-1] if '.' in video.filename else 'mp4'
+    unique_filename = f"{uuid.uuid4()}.{file_ext}"
+    file_path = UPLOAD_DIR / unique_filename
+    
+    # Save file
+    try:
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(video.file, buffer)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to save video")
+    
+    # Return the URL
+    video_url = f"/api/uploads/{unique_filename}"
+    
+    return {"video_url": video_url, "filename": unique_filename}
+
+# Serve uploaded videos through API
+@api_router.get("/uploads/{filename}")
+async def get_uploaded_video(filename: str):
+    from fastapi.responses import FileResponse
+    file_path = UPLOAD_DIR / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(file_path, media_type="video/mp4")
+
 # ==================== ADMIN HELPER ====================
 
 async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
