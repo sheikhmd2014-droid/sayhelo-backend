@@ -203,6 +203,7 @@ export default function UploadPage() {
     setThumbnailUrl('');
     setPreviewUrl('');
     setSelectedFile(null);
+    setFileSize(0);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
