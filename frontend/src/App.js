@@ -1,16 +1,26 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import AuthPage from "./pages/AuthPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import FeedPage from "./pages/FeedPage";
-import ProfilePage from "./pages/ProfilePage";
-import UploadPage from "./pages/UploadPage";
-import SearchPage from "./pages/SearchPage";
-import QRCodePage from "./pages/QRCodePage";
-import AdminLoginPage from "./pages/AdminLoginPage";
-import AdminDashboard from "./pages/AdminDashboard";
+import { lazy, Suspense } from "react";
+
+// Lazy load pages for better performance
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const FeedPage = lazy(() => import("./pages/FeedPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const UploadPage = lazy(() => import("./pages/UploadPage"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const QRCodePage = lazy(() => import("./pages/QRCodePage"));
+const AdminLoginPage = lazy(() => import("./pages/AdminLoginPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 import Navbar from "./components/Navbar";
+
+// Loading spinner component
+const PageLoader = () => (
+  <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
