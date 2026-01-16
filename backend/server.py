@@ -202,6 +202,8 @@ async def register(user_data: UserCreate):
         "bio": "",
         "followers_count": 0,
         "following_count": 0,
+        "is_banned": False,
+        "is_admin": False,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(user_doc)
@@ -219,6 +221,9 @@ async def login(user_data: UserLogin):
     user = await db.users.find_one({"email": user_data.email}, {"_id": 0})
     if not user or not verify_password(user_data.password, user['password']):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if user.get('is_banned', False):
+        raise HTTPException(status_code=403, detail="Account is banned")
     
     token = create_token(user['id'])
     user_response = {k: v for k, v in user.items() if k != 'password'}
@@ -332,6 +337,7 @@ async def create_video(video_data: VideoCreate, current_user: dict = Depends(get
         "likes_count": 0,
         "comments_count": 0,
         "shares_count": 0,
+        "is_approved": True,
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.videos.insert_one(video_doc)
