@@ -14,10 +14,13 @@ export default function VideoCard({ video, isActive, onLikeUpdate }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [showComments, setShowComments] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [isLiked, setIsLiked] = useState(video.is_liked);
   const [likesCount, setLikesCount] = useState(video.likes_count);
   const [commentsCount, setCommentsCount] = useState(video.comments_count);
+  const [sharesCount, setSharesCount] = useState(video.shares_count);
   const [likeAnimation, setLikeAnimation] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const videoRef = useRef(null);
   const { token, user } = useAuth();
   const navigate = useNavigate();
