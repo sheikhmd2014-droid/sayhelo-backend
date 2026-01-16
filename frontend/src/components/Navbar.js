@@ -30,8 +30,9 @@ export default function Navbar() {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-white/5"
+      className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-white/5 pb-safe"
       data-testid="navbar"
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}
     >
       <div className="max-w-lg mx-auto flex justify-around items-center h-16 px-4">
         {navItems.map(({ icon: Icon, path, label, requiresAuth }) => (
