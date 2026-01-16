@@ -1,4 +1,4 @@
-# TikVerse - TikTok Clone PRD
+# FunMastis - TikTok Clone PRD
 
 ## Original Problem Statement
 TikTok jaisi social media app banana hai with:
@@ -14,6 +14,8 @@ TikTok jaisi social media app banana hai with:
 - **Frontend**: React with Tailwind CSS + Shadcn UI
 - **Authentication**: JWT tokens
 - **Database Collections**: users, videos, likes, comments, follows
+- **PWA**: Progressive Web App for mobile installation
+- **Domain**: funmastis.com
 
 ## User Personas
 1. **Content Creator**: Uploads videos, builds followers
@@ -94,8 +96,28 @@ TikTok jaisi social media app banana hai with:
 - Creator monetization
 - AI recommendations
 
+## Recent Updates (January 2026)
+
+### PWA Implementation - COMPLETED ✅
+- manifest.json created with app metadata
+- service-worker.js for offline caching
+- App icons (72x72 to 512x512) generated
+- index.html updated with manifest link & apple meta tags
+- index.js updated with service worker registration
+- App is now installable on mobile devices
+
+### Other Completed Features
+- Admin Panel with user/video/comment management
+- App renamed to "FunMastis"
+- Direct video file upload & camera recording
+- Video trimming feature
+- Camera filters (Snapchat-style)
+- Forgot Password flow
+- Share, Download, QR Code features
+- Performance optimizations (lazy loading, memoization)
+
 ## Next Tasks
-1. Add video file upload to cloud storage
-2. Add notifications for likes/comments/follows
-3. Implement hashtags system
-4. Add video effects/filters
+1. Native Mobile App (Google Play Store / iOS App Store)
+2. Push Notifications for likes/comments/follows
+3. Hashtags & trending system
+4. Video effects/filters improvements
