@@ -7,6 +7,7 @@ import FeedPage from "./pages/FeedPage";
 import ProfilePage from "./pages/ProfilePage";
 import UploadPage from "./pages/UploadPage";
 import SearchPage from "./pages/SearchPage";
+import QRCodePage from "./pages/QRCodePage";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import Navbar from "./components/Navbar";
@@ -97,6 +98,15 @@ function AppContent() {
           element={
             <>
               <SearchPage />
+              <Navbar />
+            </>
+          }
+        />
+        <Route
+          path="/qr-code"
+          element={
+            <>
+              <QRCodePage />
               <Navbar />
             </>
           }
