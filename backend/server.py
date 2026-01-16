@@ -43,6 +43,10 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+class AdminLogin(BaseModel):
+    email: str
+    password: str
+
 class UserResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
@@ -52,6 +56,8 @@ class UserResponse(BaseModel):
     bio: Optional[str] = None
     followers_count: int = 0
     following_count: int = 0
+    is_banned: bool = False
+    is_admin: bool = False
     created_at: str
 
 class VideoCreate(BaseModel):
@@ -72,6 +78,7 @@ class VideoResponse(BaseModel):
     comments_count: int = 0
     shares_count: int = 0
     is_liked: bool = False
+    is_approved: bool = True
     created_at: str
 
 class CommentCreate(BaseModel):
@@ -96,6 +103,46 @@ class ProfileUpdate(BaseModel):
     username: Optional[str] = None
     bio: Optional[str] = None
     avatar: Optional[str] = None
+
+# Admin Models
+class AdminUserResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    username: str
+    email: str
+    avatar: Optional[str] = None
+    bio: Optional[str] = None
+    followers_count: int = 0
+    following_count: int = 0
+    is_banned: bool = False
+    is_admin: bool = False
+    created_at: str
+
+class AdminVideoResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    username: str
+    user_avatar: Optional[str] = None
+    caption: str
+    video_url: str
+    thumbnail_url: Optional[str] = None
+    likes_count: int = 0
+    comments_count: int = 0
+    shares_count: int = 0
+    is_approved: bool = True
+    created_at: str
+
+class AdminStatsResponse(BaseModel):
+    total_users: int
+    total_videos: int
+    total_likes: int
+    total_comments: int
+    total_follows: int
+    banned_users: int
+    pending_videos: int
+    users_today: int
+    videos_today: int
 
 # ==================== AUTH HELPERS ====================
 
