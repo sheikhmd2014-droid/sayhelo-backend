@@ -73,51 +73,35 @@ export default function UploadPage() {
         toast.error('Please select a video file');
         return;
       }
+      
       setSelectedFile(file);
       setFileSize(file.size);
       setPreviewUrl(URL.createObjectURL(file));
       setVideoUrl('');
+      setTrimInfo(null);
       
-      // Show warning if file is large
-      if (file.size > 50 * 1024 * 1024) {
-        toast.warning('Video is large! Consider compressing for faster upload');
+      // Show editor option if file is large
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`Video is too large (${formatFileSize(file.size)}). Max: 100MB. Use the trim option to reduce size.`);
+        setShowEditor(true);
+      } else if (file.size > 50 * 1024 * 1024) {
+        toast.warning('Large video! Consider trimming for faster upload');
       }
     }
   };
 
-  const compressVideo = async () => {
-    if (!selectedFile || !videoRef.current) return;
-    
-    setCompressing(true);
-    toast.info('Compressing video... Please wait');
+  const handleEditorSave = (file, trim) => {
+    setTrimInfo(trim);
+    setShowEditor(false);
+    toast.success(`Video trimmed! New duration: ${Math.round(trim.duration)}s`);
+  };
 
-    try {
-      const video = videoRef.current;
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      // Wait for video to load metadata
-      await new Promise((resolve) => {
-        if (video.readyState >= 2) resolve();
-        else video.onloadeddata = resolve;
-      });
-
-      // Reduce dimensions for compression
-      const scale = compressionQuality;
-      canvas.width = video.videoWidth * scale;
-      canvas.height = video.videoHeight * scale;
-
-      // For now, we'll just reduce the quality message
-      // True video compression requires server-side processing or WebCodecs API
-      
-      toast.success(`Video ready! Original: ${formatFileSize(selectedFile.size)}`);
-      toast.info('Tip: For better compression, use a shorter video clip');
-      
-    } catch (error) {
-      console.error('Compression error:', error);
-      toast.error('Compression failed. Try uploading as-is');
-    } finally {
-      setCompressing(false);
+  const handleEditorCancel = () => {
+    setShowEditor(false);
+    // Clear if file was too large
+    if (selectedFile && selectedFile.size > MAX_FILE_SIZE) {
+      clearPreview();
+      toast.info('Please select a smaller video or trim it');
     }
   };
 
