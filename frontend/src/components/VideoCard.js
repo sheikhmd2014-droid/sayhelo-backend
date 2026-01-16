@@ -316,7 +316,24 @@ export default function VideoCard({ video, isActive, onLikeUpdate }) {
             <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center">
               <Share2 className="w-6 h-6" />
             </div>
-            <span className="text-xs font-semibold">{formatCount(video.shares_count)}</span>
+            <span className="text-xs font-semibold">{formatCount(sharesCount)}</span>
+          </button>
+
+          {/* Download */}
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            className="flex flex-col items-center gap-1 active-scale"
+            data-testid={`download-button-${video.id}`}
+          >
+            <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center">
+              {downloading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Download className="w-6 h-6" />
+              )}
+            </div>
+            <span className="text-xs font-semibold">Save</span>
           </button>
 
           {/* Music disc */}
