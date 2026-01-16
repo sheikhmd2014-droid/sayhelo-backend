@@ -289,6 +289,84 @@ export default function ProfilePage() {
 
         {/* Videos Grid */}
         <Tabs defaultValue="videos" className="w-full">
+
+      {/* Edit Profile Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="bg-zinc-900 border-zinc-800 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-unbounded">Edit Profile</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Avatar Selection */}
+            <div className="space-y-3">
+              <label className="text-sm text-zinc-400">Choose Avatar</label>
+              <div className="flex justify-center mb-4">
+                <Avatar className="w-20 h-20 border-2 border-primary">
+                  <AvatarImage src={editData.avatar} />
+                  <AvatarFallback className="bg-zinc-800 text-white text-2xl">
+                    {editData.username?.[0]?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {avatarOptions.map((avatar, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setEditData({ ...editData, avatar })}
+                    className={`rounded-xl overflow-hidden border-2 transition-all ${
+                      editData.avatar === avatar ? 'border-primary glow-primary' : 'border-zinc-700 hover:border-zinc-500'
+                    }`}
+                  >
+                    <img src={avatar} alt={`Avatar ${index + 1}`} className="w-full h-full" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Username */}
+            <div className="space-y-2">
+              <label className="text-sm text-zinc-400">Username</label>
+              <Input
+                value={editData.username}
+                onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+                className="bg-zinc-800 border-zinc-700 h-11 rounded-xl"
+                placeholder="Your username"
+                data-testid="edit-username"
+              />
+            </div>
+
+            {/* Bio */}
+            <div className="space-y-2">
+              <label className="text-sm text-zinc-400">Bio</label>
+              <Textarea
+                value={editData.bio}
+                onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                className="bg-zinc-800 border-zinc-700 rounded-xl resize-none"
+                placeholder="Tell us about yourself..."
+                rows={3}
+                maxLength={150}
+                data-testid="edit-bio"
+              />
+              <p className="text-xs text-zinc-600 text-right">{editData.bio?.length || 0}/150</p>
+            </div>
+
+            {/* Save Button */}
+            <Button
+              onClick={handleSaveProfile}
+              disabled={saving}
+              className="w-full h-11 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 hover:from-fuchsia-600 hover:to-violet-700 font-semibold"
+              data-testid="save-profile-btn"
+            >
+              {saving ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
           <TabsList className="w-full bg-transparent border-b border-zinc-800 rounded-none h-12 p-0">
             <TabsTrigger
               value="videos"
