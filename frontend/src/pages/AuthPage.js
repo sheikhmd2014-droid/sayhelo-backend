@@ -152,6 +152,16 @@ export default function AuthPage() {
               {isLogin ? 'Sign Up' : 'Sign In'}
             </span>
           </button>
+          
+          {isLogin && (
+            <button
+              data-testid="forgot-password-link"
+              onClick={() => navigate('/forgot-password')}
+              className="block w-full mt-3 text-zinc-500 hover:text-fuchsia-400 transition-colors text-sm"
+            >
+              Forgot Password?
+            </button>
+          )}
         </div>
       </div>
 
