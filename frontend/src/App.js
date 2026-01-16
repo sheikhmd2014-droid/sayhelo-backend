@@ -6,6 +6,8 @@ import FeedPage from "./pages/FeedPage";
 import ProfilePage from "./pages/ProfilePage";
 import UploadPage from "./pages/UploadPage";
 import SearchPage from "./pages/SearchPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import Navbar from "./components/Navbar";
 
 const ProtectedRoute = ({ children }) => {
@@ -94,6 +96,8 @@ function AppContent() {
             </>
           }
         />
+        <Route path="/admin" element={<AdminLoginPage />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
       <Toaster position="top-center" theme="dark" />
     </div>
