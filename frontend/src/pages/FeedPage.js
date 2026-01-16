@@ -107,7 +107,7 @@ export default function FeedPage() {
       data-testid="video-feed"
     >
       {videos.map((video, index) => (
-        <VideoCard
+        <MemoizedVideoCard
           key={video.id}
           video={video}
           isActive={index === currentIndex}
