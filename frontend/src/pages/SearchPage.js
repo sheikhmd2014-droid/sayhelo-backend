@@ -188,7 +188,7 @@ export default function SearchPage() {
         ) : (
           <div className="py-16 text-center">
             <Search className="w-16 h-16 mx-auto mb-4 text-zinc-800" />
-            <h2 className="font-unbounded font-bold text-lg mb-2">Search Fun Video</h2>
+            <h2 className="font-unbounded font-bold text-lg mb-2">Search FunMastis</h2>
             <p className="text-zinc-500 text-sm">Find users and videos</p>
           </div>
         )}

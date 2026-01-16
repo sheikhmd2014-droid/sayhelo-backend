@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
         <h1 className="font-unbounded font-black text-3xl tracking-tighter uppercase bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
           Admin Panel
         </h1>
-        <p className="text-zinc-500 text-sm mt-2">Fun Video App Management</p>
+        <p className="text-zinc-500 text-sm mt-2">FunMastis Admin Panel</p>
       </div>
 
       {/* Login Card */}
@@ -116,7 +116,7 @@ export default function AdminLoginPage() {
             onClick={() => navigate('/')}
             className="text-zinc-500 hover:text-white transition-colors text-sm"
           >
-            ← Back to Fun Video App
+            ← Back to FunMastis
           </button>
         </div>
       </div>
