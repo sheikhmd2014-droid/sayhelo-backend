@@ -193,6 +193,7 @@ export default function UploadPage() {
     setPreviewUrl('');
     setSelectedFile(null);
     setFileSize(0);
+    setTrimInfo(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
