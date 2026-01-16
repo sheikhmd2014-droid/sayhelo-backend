@@ -50,6 +50,7 @@ export default function UploadPage() {
   const [compressing, setCompressing] = useState(false);
   const [compressionQuality, setCompressionQuality] = useState(0.7);
   const [showEditor, setShowEditor] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const [trimInfo, setTrimInfo] = useState(null);
   const videoRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -58,6 +59,17 @@ export default function UploadPage() {
   const navigate = useNavigate();
 
   const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB limit
+
+  const handleVideoRecorded = (file, preview) => {
+    setSelectedFile(file);
+    setFileSize(file.size);
+    setPreviewUrl(preview);
+    setVideoUrl('');
+    setTrimInfo(null);
+    setShowCamera(false);
+    setUploadMode('file');
+    toast.success('Video recorded successfully!');
+  };
 
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
