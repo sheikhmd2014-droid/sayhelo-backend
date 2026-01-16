@@ -733,6 +733,9 @@ async def change_admin_password(data: ChangePasswordRequest, admin: dict = Depen
 # Include router and middleware
 app.include_router(api_router)
 
+# Serve uploaded files
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
