@@ -65,7 +65,7 @@ function AppContent() {
           element={
             <>
               <FeedPage />
-              {user && <Navbar />}
+              <Navbar />
             </>
           }
         />
@@ -83,7 +83,7 @@ function AppContent() {
           element={
             <>
               <ProfilePage />
-              {user && <Navbar />}
+              <Navbar />
             </>
           }
         />
@@ -92,7 +92,7 @@ function AppContent() {
           element={
             <>
               <SearchPage />
-              {user && <Navbar />}
+              <Navbar />
             </>
           }
         />
