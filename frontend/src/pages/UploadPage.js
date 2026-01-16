@@ -324,14 +324,14 @@ export default function UploadPage() {
         {/* Submit Button */}
         <Button
           onClick={handleSubmit}
-          disabled={loading || !videoUrl || !caption.trim()}
+          disabled={loading || uploading || (uploadMode === 'file' ? !selectedFile : !videoUrl) || !caption.trim()}
           className="w-full h-12 rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 hover:from-fuchsia-600 hover:to-violet-700 font-semibold text-base active-scale disabled:opacity-50"
           data-testid="upload-submit"
         >
-          {loading ? (
+          {loading || uploading ? (
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Uploading...
+              {uploading ? 'Uploading Video...' : 'Posting...'}
             </div>
           ) : (
             <div className="flex items-center gap-2">
