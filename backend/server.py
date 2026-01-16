@@ -546,6 +546,14 @@ async def upload_video_file(
     if not video.content_type.startswith('video/'):
         raise HTTPException(status_code=400, detail="File must be a video")
     
+    # Check file size (read in chunks to get size)
+    contents = await video.read()
+    file_size = len(contents)
+    
+    # 100MB limit
+    if file_size > 100 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="Video must be less than 100MB. Please trim your video.")
+    
     # Generate unique filename
     file_ext = video.filename.split('.')[-1] if '.' in video.filename else 'mp4'
     unique_filename = f"{uuid.uuid4()}.{file_ext}"
@@ -554,14 +562,14 @@ async def upload_video_file(
     # Save file
     try:
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(video.file, buffer)
+            buffer.write(contents)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to save video")
     
     # Return the URL
     video_url = f"/api/uploads/{unique_filename}"
     
-    return {"video_url": video_url, "filename": unique_filename}
+    return {"video_url": video_url, "filename": unique_filename, "size": file_size}
 
 # Serve uploaded videos through API
 @api_router.get("/uploads/{filename}")
