@@ -41,9 +41,55 @@ export default function UploadPage() {
   const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [uploadMode, setUploadMode] = useState('file'); // 'file' or 'url'
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const videoRef = useRef(null);
+  const fileInputRef = useRef(null);
   const { token } = useAuth();
   const navigate = useNavigate();
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 100 * 1024 * 1024) { // 100MB limit
+        toast.error('Video must be less than 100MB');
+        return;
+      }
+      if (!file.type.startsWith('video/')) {
+        toast.error('Please select a video file');
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setVideoUrl('');
+    }
+  };
+
+  const uploadVideoFile = async () => {
+    if (!selectedFile) return null;
+    
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('video', selectedFile);
+      
+      const response = await axios.post(`${API}/upload/video`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      return response.data.video_url;
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload video');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSelectSample = (sample) => {
     setVideoUrl(sample.url);
