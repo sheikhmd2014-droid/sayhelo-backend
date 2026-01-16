@@ -506,6 +506,14 @@ export default function UploadPage() {
         </Button>
       </div>
 
+      {/* Camera Recorder */}
+      {showCamera && (
+        <VideoRecorder
+          onVideoRecorded={handleVideoRecorded}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
+
       {/* Video Editor Modal */}
       {showEditor && selectedFile && (
         <VideoEditor
