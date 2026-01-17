@@ -213,7 +213,7 @@ class NotificationResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
     user_id: str
-    type: str  # like, comment, follow
+    type: str  # like, comment, follow, gift
     from_user_id: str
     from_username: str
     from_avatar: Optional[str] = None
