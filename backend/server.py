@@ -447,7 +447,7 @@ async def forgot_password(data: ForgotPasswordRequest):
     user = await db.users.find_one({"email": data.email}, {"_id": 0})
     if not user:
         # Don't reveal if email exists or not for security
-        return {"message": "If email exists, reset code has been generated", "success": True}
+        return {"message": "If email exists, reset code has been sent", "success": True}
     
     # Generate 6-digit reset code
     import random
@@ -463,12 +463,13 @@ async def forgot_password(data: ForgotPasswordRequest):
         "created_at": datetime.now(timezone.utc).isoformat()
     })
     
-    # In production, send email here
-    # For now, return the code (ONLY FOR DEMO - remove in production)
+    # Send email with reset code
+    email_sent = await send_reset_email(data.email, reset_code)
+    
     return {
-        "message": "Reset code generated", 
+        "message": "Reset code sent to your email" if email_sent else "Reset code generated", 
         "success": True,
-        "reset_code": reset_code,  # DEMO ONLY - In production, send via email
+        "email_sent": email_sent,
         "expires_in": "15 minutes"
     }
 
