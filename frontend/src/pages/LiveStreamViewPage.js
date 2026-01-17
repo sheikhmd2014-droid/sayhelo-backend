@@ -393,6 +393,23 @@ export default function LiveStreamViewPage() {
           ))}
         </div>
 
+        {/* Gift Animations */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          {giftAnimations.map((gift) => (
+            <div
+              key={gift.id}
+              className="animate-gift-pop text-center"
+            >
+              <div className="text-6xl mb-2">{gift.emoji}</div>
+              <div className="bg-black/70 rounded-xl px-4 py-2">
+                <p className="text-sm font-semibold text-fuchsia-400">@{gift.sender}</p>
+                <p className="text-white">sent <span className="text-yellow-500">{gift.giftName}</span></p>
+                <p className="text-xs text-yellow-400">{gift.coins} coins</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* Stream Info Overlay */}
         <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black/80 to-transparent">
           <div className="flex items-center justify-between">
