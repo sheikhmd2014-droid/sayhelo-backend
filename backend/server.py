@@ -676,6 +676,58 @@ async def share_video(video_id: str):
     
     return {"message": "Shared", "shares_count": video['shares_count'] + 1}
 
+# ==================== NOTIFICATION ROUTES ====================
+
+@api_router.get("/notifications", response_model=List[NotificationResponse])
+async def get_notifications(skip: int = 0, limit: int = 50, current_user: dict = Depends(get_current_user)):
+    """Get user's notifications"""
+    notifications = await db.notifications.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    return [NotificationResponse(**n) for n in notifications]
+
+@api_router.get("/notifications/unread-count")
+async def get_unread_count(current_user: dict = Depends(get_current_user)):
+    """Get count of unread notifications"""
+    count = await db.notifications.count_documents({
+        "user_id": current_user['id'],
+        "is_read": False
+    })
+    return {"unread_count": count}
+
+@api_router.post("/notifications/mark-read")
+async def mark_notifications_read(current_user: dict = Depends(get_current_user)):
+    """Mark all notifications as read"""
+    await db.notifications.update_many(
+        {"user_id": current_user['id'], "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "All notifications marked as read"}
+
+@api_router.post("/notifications/{notification_id}/read")
+async def mark_single_notification_read(notification_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark a single notification as read"""
+    result = await db.notifications.update_one(
+        {"id": notification_id, "user_id": current_user['id']},
+        {"$set": {"is_read": True}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return {"message": "Notification marked as read"}
+
+@api_router.delete("/notifications/{notification_id}")
+async def delete_notification(notification_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a notification"""
+    result = await db.notifications.delete_one({
+        "id": notification_id,
+        "user_id": current_user['id']
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return {"message": "Notification deleted"}
+
 # ==================== SEARCH ====================
 
 @api_router.get("/search/users", response_model=List[UserResponse])
