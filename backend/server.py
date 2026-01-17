@@ -627,6 +627,16 @@ async def create_comment(video_id: str, comment_data: CommentCreate, current_use
     await db.comments.insert_one(comment_doc)
     await db.videos.update_one({"id": video_id}, {"$inc": {"comments_count": 1}})
     
+    # Create notification for video owner
+    await create_notification(
+        user_id=video['user_id'],
+        notification_type="comment",
+        from_user=current_user,
+        video_id=video_id,
+        video_caption=video.get('caption'),
+        comment_text=comment_data.content
+    )
+    
     return CommentResponse(**comment_doc)
 
 @api_router.get("/videos/{video_id}/comments", response_model=List[CommentResponse])
