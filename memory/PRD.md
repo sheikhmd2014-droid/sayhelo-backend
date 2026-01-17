@@ -98,6 +98,14 @@ TikTok jaisi social media app banana hai with:
 
 ## Recent Updates (January 2026)
 
+### In-App Notifications - COMPLETED ✅ (Jan 17, 2026)
+- Bell icon with unread count badge
+- Dropdown showing all notifications
+- Notification types: Like, Comment, Follow
+- Mark all as read / Mark single as read
+- Click notification to navigate to relevant content
+- Auto-refresh unread count every 30 seconds
+
 ### Live Streaming Feature - COMPLETED ✅ (Jan 17, 2026)
 - Agora SDK integrated for real-time video streaming
 - Live streams page with stream cards
