@@ -1128,15 +1128,15 @@ async def admin_login(admin_data: AdminLogin):
 @api_router.post("/admin/create-admin")
 async def create_admin():
     """Create default admin if not exists"""
-    existing = await db.users.find_one({"email": "admin@tikverse.com"})
+    existing = await db.users.find_one({"email": "admin@funmastis.com"})
     if existing:
-        return {"message": "Admin already exists", "email": "admin@tikverse.com"}
+        return {"message": "Admin already exists", "email": "admin@funmastis.com"}
     
     admin_id = str(uuid.uuid4())
     admin_doc = {
         "id": admin_id,
         "username": "admin",
-        "email": "admin@tikverse.com",
+        "email": "admin@funmastis.com",
         "password": hash_password("admin123"),
         "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
         "bio": "FunMastis Administrator",
@@ -1147,7 +1147,7 @@ async def create_admin():
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.users.insert_one(admin_doc)
-    return {"message": "Admin created", "email": "admin@tikverse.com", "password": "admin123"}
+    return {"message": "Admin created", "email": "admin@funmastis.com", "password": "admin123"}
 
 @api_router.get("/admin/stats", response_model=AdminStatsResponse)
 async def get_admin_stats(admin: dict = Depends(get_admin_user)):
