@@ -13,6 +13,7 @@ const SearchPage = lazy(() => import("./pages/SearchPage"));
 const QRCodePage = lazy(() => import("./pages/QRCodePage"));
 const LiveStreamsPage = lazy(() => import("./pages/LiveStreamsPage"));
 const LiveStreamViewPage = lazy(() => import("./pages/LiveStreamViewPage"));
+const CoinsPage = lazy(() => import("./pages/CoinsPage"));
 const AdminLoginPage = lazy(() => import("./pages/AdminLoginPage"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 import Navbar from "./components/Navbar";
