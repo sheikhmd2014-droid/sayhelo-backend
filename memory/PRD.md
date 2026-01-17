@@ -1,4 +1,4 @@
-# FunMastis - TikTok Clone PRD
+# FunMastis - Short Video Social App PRD
 
 ## Original Problem Statement
 TikTok jaisi social media app banana hai with:
