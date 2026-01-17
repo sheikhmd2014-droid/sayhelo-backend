@@ -101,26 +101,35 @@ export default function FeedPage() {
   }
 
   return (
-    <div
-      ref={containerRef}
-      onScroll={handleScroll}
-      className="snap-feed scrollbar-hide"
-      data-testid="video-feed"
-    >
-      {videos.map((video, index) => (
-        <MemoizedVideoCard
-          key={video.id}
-          video={video}
-          isActive={index === currentIndex}
-          onLikeUpdate={updateVideoLike}
-        />
-      ))}
-      
-      {loading && (
-        <div className="h-20 flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+    <div className="h-[100dvh] bg-black relative">
+      {/* Header with Notification Bell */}
+      {user && (
+        <div className="absolute top-0 right-0 z-30 p-4">
+          <NotificationBell />
         </div>
       )}
+      
+      <div
+        ref={containerRef}
+        onScroll={handleScroll}
+        className="snap-feed scrollbar-hide h-full"
+        data-testid="video-feed"
+      >
+        {videos.map((video, index) => (
+          <MemoizedVideoCard
+            key={video.id}
+            video={video}
+            isActive={index === currentIndex}
+            onLikeUpdate={updateVideoLike}
+          />
+        ))}
+        
+        {loading && (
+          <div className="h-20 flex items-center justify-center">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
