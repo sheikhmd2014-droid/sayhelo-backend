@@ -787,11 +787,8 @@ async def get_agora_token(channel_name: str, role: str = "publisher", user: dict
     # Set token expiration (1 hour)
     privilege_expired_ts = int(datetime.now(timezone.utc).timestamp()) + 3600
     
-    # Determine role
-    if role == "publisher":
-        agora_role = Role_Publisher
-    else:
-        agora_role = Role_Subscriber
+    # Role: 1 = publisher, 2 = subscriber
+    agora_role = 1 if role == "publisher" else 2
     
     token = RtcTokenBuilder.buildTokenWithUid(
         AGORA_APP_ID,
