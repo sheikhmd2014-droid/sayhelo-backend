@@ -124,6 +124,23 @@ function AppContent() {
               </>
             }
           />
+          <Route
+            path="/live"
+            element={
+              <>
+                <LiveStreamsPage />
+                <Navbar />
+              </>
+            }
+          />
+          <Route
+            path="/live/:streamId"
+            element={
+              <ProtectedRoute>
+                <LiveStreamViewPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/admin" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
