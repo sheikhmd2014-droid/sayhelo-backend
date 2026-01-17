@@ -240,6 +240,22 @@ export default function LiveStreamViewPage() {
     }, 2000);
   }, []);
 
+  const showGiftAnimation = useCallback((emoji, sender, giftName, coins) => {
+    const id = giftIdRef.current++;
+    const gift = {
+      id,
+      emoji,
+      sender,
+      giftName,
+      coins
+    };
+    setGiftAnimations(prev => [...prev, gift]);
+    
+    setTimeout(() => {
+      setGiftAnimations(prev => prev.filter(g => g.id !== id));
+    }, 4000);
+  }, []);
+
   const sendMessage = () => {
     if (!newMessage.trim() || !wsRef.current) return;
     
