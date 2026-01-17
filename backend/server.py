@@ -197,6 +197,21 @@ class AgoraTokenResponse(BaseModel):
 class StreamChatMessage(BaseModel):
     content: str
 
+# Notification Models
+class NotificationResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    type: str  # like, comment, follow
+    from_user_id: str
+    from_username: str
+    from_avatar: Optional[str] = None
+    video_id: Optional[str] = None
+    video_caption: Optional[str] = None
+    comment_text: Optional[str] = None
+    is_read: bool = False
+    created_at: str
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
