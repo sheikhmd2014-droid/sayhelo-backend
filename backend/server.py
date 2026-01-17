@@ -584,6 +584,15 @@ async def like_video(video_id: str, current_user: dict = Depends(get_current_use
     
     await db.videos.update_one({"id": video_id}, {"$inc": {"likes_count": 1}})
     
+    # Create notification for video owner
+    await create_notification(
+        user_id=video['user_id'],
+        notification_type="like",
+        from_user=current_user,
+        video_id=video_id,
+        video_caption=video.get('caption')
+    )
+    
     return {"message": "Liked", "likes_count": video['likes_count'] + 1}
 
 @api_router.delete("/videos/{video_id}/like")
