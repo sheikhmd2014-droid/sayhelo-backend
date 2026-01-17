@@ -66,7 +66,7 @@ export default function AdminLoginPage() {
               id="email"
               data-testid="admin-email-input"
               type="email"
-              placeholder="admin@tikverse.com"
+              placeholder="admin@funmastis.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="bg-zinc-900/50 border-zinc-800 focus:border-red-500 h-12 rounded-xl"
