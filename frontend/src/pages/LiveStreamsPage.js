@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Radio, Users, Play, Plus } from "lucide-react";
+import NotificationBell from "../components/NotificationBell";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
