@@ -98,6 +98,15 @@ Short video social media app banana hai with:
 
 ## Recent Updates (January 2026)
 
+### Virtual Gifts & Coins System - COMPLETED ✅ (Jan 17, 2026)
+- Razorpay payment integration (UPI, Cards, Wallets)
+- 4 Coin packages: Starter (₹49), Popular (₹199), Super (₹349), Mega (₹1499)
+- 6 Gift types: Rose (10), Heart (50), Star (100), Fire (200), Diamond (500), Crown (1000)
+- Creator wallet with earned coins tracking
+- 30% platform commission (70% to creators)
+- Gift animations during live streams
+- Withdrawal system for creators
+
 ### Profile Photo Upload - COMPLETED ✅ (Jan 17, 2026)
 - Custom photo upload option added
 - Camera icon on avatar for quick upload
