@@ -1334,6 +1334,299 @@ async def change_admin_password(data: ChangePasswordRequest, admin: dict = Depen
     
     return {"message": "Password changed successfully"}
 
+# ==================== COINS & WALLET SYSTEM ====================
+
+# Coin Packages
+COIN_PACKAGES = [
+    {"id": "starter", "name": "Starter", "coins": 100, "price_inr": 49, "price_usd": 0.99, "bonus_coins": 0},
+    {"id": "popular", "name": "Popular", "coins": 500, "price_inr": 199, "price_usd": 2.99, "bonus_coins": 50},
+    {"id": "super", "name": "Super", "coins": 1000, "price_inr": 349, "price_usd": 4.99, "bonus_coins": 150},
+    {"id": "mega", "name": "Mega", "coins": 5000, "price_inr": 1499, "price_usd": 19.99, "bonus_coins": 1000},
+]
+
+# Gift Items
+GIFT_ITEMS = [
+    {"id": "rose", "name": "Rose", "emoji": "🌹", "coins": 10},
+    {"id": "heart", "name": "Heart", "emoji": "❤️", "coins": 50},
+    {"id": "star", "name": "Star", "emoji": "⭐", "coins": 100},
+    {"id": "fire", "name": "Fire", "emoji": "🔥", "coins": 200},
+    {"id": "diamond", "name": "Diamond", "emoji": "💎", "coins": 500},
+    {"id": "crown", "name": "Crown", "emoji": "👑", "coins": 1000},
+]
+
+# Conversion rate: 100 coins = ₹10 (after platform commission)
+COINS_TO_INR_RATE = 0.07  # 70% to creator (after 30% commission)
+
+@api_router.get("/coins/packages")
+async def get_coin_packages():
+    """Get available coin packages"""
+    return {"packages": COIN_PACKAGES, "razorpay_key": RAZORPAY_KEY_ID}
+
+@api_router.get("/gifts")
+async def get_gift_items():
+    """Get available gift items"""
+    return {"gifts": GIFT_ITEMS}
+
+@api_router.get("/wallet")
+async def get_wallet(current_user: dict = Depends(get_current_user)):
+    """Get user's wallet"""
+    wallet = await db.wallets.find_one({"user_id": current_user['id']}, {"_id": 0})
+    if not wallet:
+        # Create wallet if not exists
+        wallet = {
+            "user_id": current_user['id'],
+            "coins": 0,
+            "earned_coins": 0,
+            "total_withdrawn": 0,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }
+        await db.wallets.insert_one(wallet)
+    
+    return WalletResponse(**wallet)
+
+@api_router.post("/coins/create-order")
+async def create_coin_order(data: CreateOrderRequest, current_user: dict = Depends(get_current_user)):
+    """Create Razorpay order for coin purchase"""
+    if not razorpay_client:
+        raise HTTPException(status_code=500, detail="Payment gateway not configured")
+    
+    # Find package
+    package = next((p for p in COIN_PACKAGES if p['id'] == data.package_id), None)
+    if not package:
+        raise HTTPException(status_code=404, detail="Package not found")
+    
+    # Create Razorpay order
+    try:
+        order_data = {
+            "amount": package['price_inr'] * 100,  # Amount in paise
+            "currency": "INR",
+            "receipt": f"coin_{current_user['id'][:8]}_{uuid.uuid4().hex[:8]}",
+            "notes": {
+                "user_id": current_user['id'],
+                "package_id": package['id'],
+                "coins": package['coins'] + package['bonus_coins']
+            }
+        }
+        order = razorpay_client.order.create(data=order_data)
+        
+        # Save order to database
+        await db.coin_orders.insert_one({
+            "id": order['id'],
+            "user_id": current_user['id'],
+            "package_id": package['id'],
+            "amount": package['price_inr'],
+            "coins": package['coins'] + package['bonus_coins'],
+            "status": "created",
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        
+        return {
+            "order_id": order['id'],
+            "amount": package['price_inr'],
+            "currency": "INR",
+            "key": RAZORPAY_KEY_ID,
+            "package": package
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create order: {str(e)}")
+
+@api_router.post("/coins/verify-payment")
+async def verify_payment(data: VerifyPaymentRequest, current_user: dict = Depends(get_current_user)):
+    """Verify Razorpay payment and credit coins"""
+    if not razorpay_client:
+        raise HTTPException(status_code=500, detail="Payment gateway not configured")
+    
+    # Verify signature
+    try:
+        params_dict = {
+            'razorpay_order_id': data.razorpay_order_id,
+            'razorpay_payment_id': data.razorpay_payment_id,
+            'razorpay_signature': data.razorpay_signature
+        }
+        razorpay_client.utility.verify_payment_signature(params_dict)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid payment signature")
+    
+    # Get order from database
+    order = await db.coin_orders.find_one({"id": data.razorpay_order_id})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order['status'] == 'completed':
+        raise HTTPException(status_code=400, detail="Payment already processed")
+    
+    # Update order status
+    await db.coin_orders.update_one(
+        {"id": data.razorpay_order_id},
+        {"$set": {
+            "status": "completed",
+            "payment_id": data.razorpay_payment_id,
+            "completed_at": datetime.now(timezone.utc).isoformat()
+        }}
+    )
+    
+    # Credit coins to wallet
+    await db.wallets.update_one(
+        {"user_id": current_user['id']},
+        {"$inc": {"coins": order['coins']}},
+        upsert=True
+    )
+    
+    # Record transaction
+    await db.transactions.insert_one({
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "type": "purchase",
+        "coins": order['coins'],
+        "amount": order['amount'],
+        "payment_id": data.razorpay_payment_id,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Get updated wallet
+    wallet = await db.wallets.find_one({"user_id": current_user['id']}, {"_id": 0})
+    
+    return {"message": "Payment successful", "coins_added": order['coins'], "wallet": wallet}
+
+@api_router.post("/gifts/send")
+async def send_gift(data: SendGiftRequest, current_user: dict = Depends(get_current_user)):
+    """Send a gift during live stream"""
+    # Find gift
+    gift = next((g for g in GIFT_ITEMS if g['id'] == data.gift_id), None)
+    if not gift:
+        raise HTTPException(status_code=404, detail="Gift not found")
+    
+    # Check sender's wallet
+    wallet = await db.wallets.find_one({"user_id": current_user['id']})
+    if not wallet or wallet.get('coins', 0) < gift['coins']:
+        raise HTTPException(status_code=400, detail="Insufficient coins")
+    
+    # Verify receiver exists
+    receiver = await db.users.find_one({"id": data.receiver_id})
+    if not receiver:
+        raise HTTPException(status_code=404, detail="Receiver not found")
+    
+    # Calculate creator earnings (after commission)
+    creator_coins = int(gift['coins'] * (100 - PLATFORM_COMMISSION) / 100)
+    
+    # Deduct from sender
+    await db.wallets.update_one(
+        {"user_id": current_user['id']},
+        {"$inc": {"coins": -gift['coins']}}
+    )
+    
+    # Credit to receiver (earned_coins)
+    await db.wallets.update_one(
+        {"user_id": data.receiver_id},
+        {"$inc": {"earned_coins": creator_coins}},
+        upsert=True
+    )
+    
+    # Record gift transaction
+    gift_record = {
+        "id": str(uuid.uuid4()),
+        "sender_id": current_user['id'],
+        "sender_username": current_user['username'],
+        "receiver_id": data.receiver_id,
+        "stream_id": data.stream_id,
+        "gift_id": gift['id'],
+        "gift_name": gift['name'],
+        "gift_emoji": gift['emoji'],
+        "coins": gift['coins'],
+        "creator_coins": creator_coins,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.gift_transactions.insert_one(gift_record)
+    
+    # Create notification for receiver
+    await create_notification(
+        user_id=data.receiver_id,
+        notification_type="gift",
+        from_user=current_user,
+        video_id=data.stream_id,
+        comment_text=f"sent you {gift['emoji']} {gift['name']} ({gift['coins']} coins)"
+    )
+    
+    # Broadcast gift to stream chat
+    if data.stream_id:
+        stream = await db.streams.find_one({"id": data.stream_id})
+        if stream:
+            await stream_manager.broadcast(stream['channel_name'], {
+                "type": "gift",
+                "sender_username": current_user['username'],
+                "gift_emoji": gift['emoji'],
+                "gift_name": gift['name'],
+                "coins": gift['coins']
+            })
+    
+    return {
+        "message": "Gift sent successfully",
+        "gift": gift,
+        "creator_received": creator_coins
+    }
+
+@api_router.get("/wallet/transactions")
+async def get_transactions(skip: int = 0, limit: int = 20, current_user: dict = Depends(get_current_user)):
+    """Get user's transaction history"""
+    transactions = await db.transactions.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    return {"transactions": transactions}
+
+@api_router.get("/wallet/gifts-received")
+async def get_gifts_received(skip: int = 0, limit: int = 20, current_user: dict = Depends(get_current_user)):
+    """Get gifts received by creator"""
+    gifts = await db.gift_transactions.find(
+        {"receiver_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    return {"gifts": gifts}
+
+@api_router.post("/wallet/withdraw")
+async def withdraw_earnings(data: WithdrawRequest, current_user: dict = Depends(get_current_user)):
+    """Request withdrawal of earned coins"""
+    if data.coins < 1000:
+        raise HTTPException(status_code=400, detail="Minimum withdrawal is 1000 coins")
+    
+    wallet = await db.wallets.find_one({"user_id": current_user['id']})
+    if not wallet or wallet.get('earned_coins', 0) < data.coins:
+        raise HTTPException(status_code=400, detail="Insufficient earned coins")
+    
+    # Calculate INR amount
+    amount_inr = int(data.coins * COINS_TO_INR_RATE)
+    
+    # Deduct from earned_coins
+    await db.wallets.update_one(
+        {"user_id": current_user['id']},
+        {
+            "$inc": {
+                "earned_coins": -data.coins,
+                "total_withdrawn": data.coins
+            }
+        }
+    )
+    
+    # Create withdrawal request
+    withdrawal = {
+        "id": str(uuid.uuid4()),
+        "user_id": current_user['id'],
+        "coins": data.coins,
+        "amount_inr": amount_inr,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.withdrawals.insert_one(withdrawal)
+    
+    return {
+        "message": "Withdrawal request submitted",
+        "coins": data.coins,
+        "amount_inr": amount_inr,
+        "status": "pending"
+    }
+
 # Include router and middleware
 app.include_router(api_router)
 
