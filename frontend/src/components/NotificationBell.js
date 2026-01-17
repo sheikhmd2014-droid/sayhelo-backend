@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Bell, Heart, MessageCircle, UserPlus, X, Check } from "lucide-react";
+import { Bell, Heart, MessageCircle, UserPlus, X, Check, Gift } from "lucide-react";
 import { Button } from "./ui/button";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
