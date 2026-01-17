@@ -17,7 +17,7 @@ export default function FeedPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const containerRef = useRef(null);
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
 
   const fetchVideos = useCallback(async (skip = 0) => {
