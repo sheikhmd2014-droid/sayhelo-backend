@@ -24,6 +24,8 @@ export default function ProfilePage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState({ username: '', bio: '', avatar: '' });
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const fileInputRef = useRef(null);
   const { user, token, logout, updateUser } = useAuth();
   const navigate = useNavigate();
 
