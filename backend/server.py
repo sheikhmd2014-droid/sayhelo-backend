@@ -708,13 +708,10 @@ async def get_user_videos(user_id: str, skip: int = 0, limit: int = 20, current_
         ).to_list(None)
         liked_video_ids = {like['video_id'] for like in likes}
     
-    result = []
-    for video in videos:
-        is_liked = False
-        if current_user:
-            like = await db.likes.find_one({"video_id": video['id'], "user_id": current_user['id']})
-            is_liked = like is not None
-        result.append(VideoResponse(**video, is_liked=is_liked))
+    result = [
+        VideoResponse(**video, is_liked=video['id'] in liked_video_ids)
+        for video in videos
+    ]
     
     return result
 
