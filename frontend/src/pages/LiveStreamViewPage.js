@@ -6,8 +6,9 @@ import { Input } from "../components/ui/input";
 import AgoraRTC from "agora-rtc-sdk-ng";
 import { 
   Radio, Users, MessageCircle, Heart, Send, X, 
-  Mic, MicOff, Video, VideoOff, PhoneOff, Share2
+  Mic, MicOff, Video, VideoOff, PhoneOff, Share2, Gift
 } from "lucide-react";
+import GiftPanel from "../components/GiftPanel";
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 const WS_URL = API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
