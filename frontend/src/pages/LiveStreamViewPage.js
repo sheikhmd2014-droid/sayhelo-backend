@@ -547,6 +547,12 @@ export default function LiveStreamViewPage() {
             <div key={idx} className="text-sm">
               {msg.type === "system" ? (
                 <span className="text-gray-500 italic">{msg.content}</span>
+              ) : msg.type === "gift" ? (
+                <div className="bg-gradient-to-r from-pink-500/20 to-yellow-500/20 rounded-lg px-2 py-1">
+                  <span className="text-2xl mr-1">{msg.gift_emoji}</span>
+                  <span className="font-semibold text-pink-400">@{msg.sender_username}</span>
+                  <span className="text-yellow-300 ml-1">sent {msg.gift_name}</span>
+                </div>
               ) : (
                 <>
                   <span className="font-semibold text-fuchsia-400">{msg.username}</span>
