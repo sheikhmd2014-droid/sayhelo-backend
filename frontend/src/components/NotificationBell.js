@@ -156,6 +156,13 @@ export default function NotificationBell() {
             {" "}started following you
           </>
         );
+      case "gift":
+        return (
+          <>
+            <span className="font-semibold">@{notification.from_username}</span>
+            <span className="text-pink-400"> {notification.comment_text}</span>
+          </>
+        );
       default:
         return "New notification";
     }
