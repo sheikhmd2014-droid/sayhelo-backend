@@ -170,6 +170,33 @@ class ResetPasswordRequest(BaseModel):
     reset_code: str
     new_password: str
 
+# Live Stream Models
+class CreateStreamRequest(BaseModel):
+    title: str
+    description: Optional[str] = ""
+
+class StreamResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    channel_name: str
+    title: str
+    description: str
+    host_id: str
+    host_username: str
+    host_avatar: Optional[str] = None
+    viewer_count: int = 0
+    is_live: bool = True
+    created_at: str
+
+class AgoraTokenResponse(BaseModel):
+    token: str
+    channel_name: str
+    uid: int
+    app_id: str
+
+class StreamChatMessage(BaseModel):
+    content: str
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
