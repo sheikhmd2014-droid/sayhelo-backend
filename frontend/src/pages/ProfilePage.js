@@ -350,15 +350,69 @@ export default function ProfilePage() {
           <div className="space-y-6 py-4">
             {/* Avatar Selection */}
             <div className="space-y-3">
-              <label className="text-sm text-zinc-400">Choose Avatar</label>
+              <label className="text-sm text-zinc-400">Profile Photo</label>
               <div className="flex justify-center mb-4">
-                <Avatar className="w-20 h-20 border-2 border-primary">
-                  <AvatarImage src={editData.avatar} />
-                  <AvatarFallback className="bg-zinc-800 text-white text-2xl">
-                    {editData.username?.[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="w-24 h-24 border-2 border-primary">
+                    <AvatarImage src={editData.avatar} />
+                    <AvatarFallback className="bg-zinc-800 text-white text-2xl">
+                      {editData.username?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Upload button overlay */}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingPhoto}
+                    className="absolute bottom-0 right-0 bg-fuchsia-600 hover:bg-fuchsia-700 rounded-full p-2 border-2 border-zinc-900 transition-colors"
+                    data-testid="upload-photo-btn"
+                  >
+                    {uploadingPhoto ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4 text-white" />
+                    )}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                    data-testid="photo-input"
+                  />
+                </div>
               </div>
+              
+              {/* Upload Photo Button */}
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                variant="outline"
+                className="w-full h-10 rounded-xl border-zinc-700 hover:bg-zinc-800"
+                data-testid="upload-photo-button"
+              >
+                {uploadingPhoto ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-fuchsia-500 border-t-transparent rounded-full animate-spin mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload Your Photo
+                  </>
+                )}
+              </Button>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-zinc-700" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-zinc-900 px-2 text-zinc-500">Or choose avatar</span>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-4 gap-2">
                 {avatarOptions.map((avatar, index) => (
                   <button
