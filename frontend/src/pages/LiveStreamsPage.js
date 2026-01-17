@@ -91,16 +91,19 @@ export default function LiveStreamsPage() {
             <Radio className="w-6 h-6 text-red-500 animate-pulse" />
             <h1 className="text-xl font-bold">Live Streams</h1>
           </div>
-          {user && (
-            <Button 
-              onClick={() => setShowCreateModal(true)}
-              className="bg-fuchsia-600 hover:bg-fuchsia-700"
-              data-testid="go-live-btn"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Go Live
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            {user && (
+              <Button 
+                onClick={() => setShowCreateModal(true)}
+                className="bg-fuchsia-600 hover:bg-fuchsia-700"
+                data-testid="go-live-btn"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Go Live
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
