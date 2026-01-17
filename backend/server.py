@@ -704,6 +704,231 @@ async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(sec
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+# ==================== LIVE STREAMING ====================
+
+# WebSocket Connection Manager for Live Chat
+class StreamConnectionManager:
+    def __init__(self):
+        self.active_connections: Dict[str, Set[WebSocket]] = {}
+        self.stream_viewers: Dict[str, int] = {}
+    
+    async def connect(self, websocket: WebSocket, channel_name: str):
+        await websocket.accept()
+        if channel_name not in self.active_connections:
+            self.active_connections[channel_name] = set()
+            self.stream_viewers[channel_name] = 0
+        self.active_connections[channel_name].add(websocket)
+        self.stream_viewers[channel_name] += 1
+    
+    def disconnect(self, websocket: WebSocket, channel_name: str):
+        if channel_name in self.active_connections:
+            self.active_connections[channel_name].discard(websocket)
+            self.stream_viewers[channel_name] = max(0, self.stream_viewers.get(channel_name, 1) - 1)
+            if not self.active_connections[channel_name]:
+                del self.active_connections[channel_name]
+                del self.stream_viewers[channel_name]
+    
+    async def broadcast(self, channel_name: str, message: dict):
+        if channel_name in self.active_connections:
+            disconnected = []
+            for connection in self.active_connections[channel_name]:
+                try:
+                    await connection.send_json(message)
+                except:
+                    disconnected.append(connection)
+            for conn in disconnected:
+                self.disconnect(conn, channel_name)
+    
+    def get_viewer_count(self, channel_name: str) -> int:
+        return self.stream_viewers.get(channel_name, 0)
+
+stream_manager = StreamConnectionManager()
+
+@api_router.post("/streams/create", response_model=StreamResponse)
+async def create_stream(stream_data: CreateStreamRequest, user: dict = Depends(get_current_user)):
+    """Create a new live stream"""
+    if user.get('is_banned', False):
+        raise HTTPException(status_code=403, detail="You are banned from streaming")
+    
+    # Check if user already has an active stream
+    existing = await db.streams.find_one({"host_id": user['id'], "is_live": True})
+    if existing:
+        raise HTTPException(status_code=400, detail="You already have an active stream")
+    
+    stream_id = str(uuid.uuid4())
+    channel_name = f"stream_{stream_id[:8]}"
+    
+    stream_doc = {
+        "id": stream_id,
+        "channel_name": channel_name,
+        "title": stream_data.title,
+        "description": stream_data.description or "",
+        "host_id": user['id'],
+        "host_username": user['username'],
+        "host_avatar": user.get('avatar'),
+        "viewer_count": 0,
+        "is_live": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.streams.insert_one(stream_doc)
+    
+    return StreamResponse(**{k: v for k, v in stream_doc.items() if k != '_id'})
+
+@api_router.get("/streams/token/{channel_name}", response_model=AgoraTokenResponse)
+async def get_agora_token(channel_name: str, role: str = "publisher", user: dict = Depends(get_current_user)):
+    """Generate Agora RTC token for streaming"""
+    if not AGORA_APP_ID or not AGORA_APP_CERTIFICATE:
+        raise HTTPException(status_code=500, detail="Agora credentials not configured")
+    
+    # Generate unique UID for user
+    uid = abs(hash(user['id'])) % (10**9)
+    
+    # Set token expiration (1 hour)
+    privilege_expired_ts = int(datetime.now(timezone.utc).timestamp()) + 3600
+    
+    # Determine role
+    if role == "publisher":
+        agora_role = Role_Publisher
+    else:
+        agora_role = Role_Subscriber
+    
+    token = RtcTokenBuilder.buildTokenWithUid(
+        AGORA_APP_ID,
+        AGORA_APP_CERTIFICATE,
+        channel_name,
+        uid,
+        agora_role,
+        privilege_expired_ts
+    )
+    
+    return AgoraTokenResponse(
+        token=token,
+        channel_name=channel_name,
+        uid=uid,
+        app_id=AGORA_APP_ID
+    )
+
+@api_router.get("/streams/live", response_model=List[StreamResponse])
+async def get_live_streams():
+    """Get all active live streams"""
+    streams = await db.streams.find({"is_live": True}, {"_id": 0}).sort("created_at", -1).to_list(50)
+    
+    # Update viewer counts from connection manager
+    for stream in streams:
+        stream['viewer_count'] = stream_manager.get_viewer_count(stream['channel_name'])
+    
+    return [StreamResponse(**s) for s in streams]
+
+@api_router.get("/streams/{stream_id}", response_model=StreamResponse)
+async def get_stream(stream_id: str):
+    """Get stream details"""
+    stream = await db.streams.find_one({"id": stream_id}, {"_id": 0})
+    if not stream:
+        raise HTTPException(status_code=404, detail="Stream not found")
+    
+    stream['viewer_count'] = stream_manager.get_viewer_count(stream['channel_name'])
+    return StreamResponse(**stream)
+
+@api_router.post("/streams/{stream_id}/end")
+async def end_stream(stream_id: str, user: dict = Depends(get_current_user)):
+    """End a live stream"""
+    stream = await db.streams.find_one({"id": stream_id})
+    if not stream:
+        raise HTTPException(status_code=404, detail="Stream not found")
+    
+    if stream['host_id'] != user['id'] and not user.get('is_admin', False):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    await db.streams.update_one({"id": stream_id}, {"$set": {"is_live": False}})
+    
+    # Notify all viewers
+    await stream_manager.broadcast(stream['channel_name'], {
+        "type": "stream_ended",
+        "message": "Stream has ended"
+    })
+    
+    return {"message": "Stream ended successfully"}
+
+@api_router.get("/streams/{stream_id}/chat")
+async def get_stream_chat(stream_id: str, limit: int = 50):
+    """Get chat messages for a stream"""
+    messages = await db.stream_messages.find(
+        {"stream_id": stream_id}, 
+        {"_id": 0}
+    ).sort("created_at", -1).limit(limit).to_list(limit)
+    
+    return list(reversed(messages))
+
+# WebSocket for Live Stream Chat
+@app.websocket("/ws/stream/{channel_name}/{user_id}/{username}")
+async def stream_chat_websocket(websocket: WebSocket, channel_name: str, user_id: str, username: str):
+    await stream_manager.connect(websocket, channel_name)
+    
+    # Broadcast viewer joined
+    await stream_manager.broadcast(channel_name, {
+        "type": "viewer_joined",
+        "username": username,
+        "viewer_count": stream_manager.get_viewer_count(channel_name)
+    })
+    
+    # Update viewer count in database
+    await db.streams.update_one(
+        {"channel_name": channel_name},
+        {"$set": {"viewer_count": stream_manager.get_viewer_count(channel_name)}}
+    )
+    
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message_data = json.loads(data)
+            
+            if message_data.get("type") == "chat":
+                # Save message to database
+                msg_doc = {
+                    "id": str(uuid.uuid4()),
+                    "stream_id": channel_name,
+                    "user_id": user_id,
+                    "username": username,
+                    "content": message_data.get("content", ""),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.stream_messages.insert_one(msg_doc)
+                
+                # Broadcast to all viewers
+                await stream_manager.broadcast(channel_name, {
+                    "type": "chat",
+                    "id": msg_doc["id"],
+                    "user_id": user_id,
+                    "username": username,
+                    "content": msg_doc["content"],
+                    "created_at": msg_doc["created_at"]
+                })
+            
+            elif message_data.get("type") == "reaction":
+                # Broadcast reaction
+                await stream_manager.broadcast(channel_name, {
+                    "type": "reaction",
+                    "username": username,
+                    "emoji": message_data.get("emoji", "❤️")
+                })
+    
+    except WebSocketDisconnect:
+        stream_manager.disconnect(websocket, channel_name)
+        
+        # Broadcast viewer left
+        await stream_manager.broadcast(channel_name, {
+            "type": "viewer_left",
+            "username": username,
+            "viewer_count": stream_manager.get_viewer_count(channel_name)
+        })
+        
+        # Update viewer count in database
+        await db.streams.update_one(
+            {"channel_name": channel_name},
+            {"$set": {"viewer_count": stream_manager.get_viewer_count(channel_name)}}
+        )
+
 # ==================== ADMIN ROUTES ====================
 
 @api_router.post("/admin/login", response_model=TokenResponse)
