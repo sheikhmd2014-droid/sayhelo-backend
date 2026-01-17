@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Home, Search, PlusSquare, User, LogIn, Radio } from 'lucide-react';
+import { Home, Search, PlusSquare, User, LogIn, Radio, Coins } from 'lucide-react';
 
 export default function Navbar() {
   const location = useLocation();
@@ -17,9 +17,9 @@ export default function Navbar() {
 
   const navItems = [
     { icon: Home, path: '/', label: 'Home', requiresAuth: false },
-    { icon: Search, path: '/search', label: 'Search', requiresAuth: false },
     { icon: Radio, path: '/live', label: 'Live', requiresAuth: false },
     { icon: PlusSquare, path: '/upload', label: 'Upload', requiresAuth: true },
+    { icon: Coins, path: '/coins', label: 'Coins', requiresAuth: true },
     { icon: user ? User : LogIn, path: user ? `/profile/${user.id}` : '/auth', label: user ? 'Profile' : 'Login', requiresAuth: false },
   ];
 
