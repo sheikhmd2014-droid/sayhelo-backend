@@ -126,6 +126,15 @@ function AppContent() {
             }
           />
           <Route
+            path="/coins"
+            element={
+              <ProtectedRoute>
+                <CoinsPage />
+                <Navbar />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/live"
             element={
               <>
