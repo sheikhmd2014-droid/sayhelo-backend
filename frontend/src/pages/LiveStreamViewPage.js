@@ -31,7 +31,9 @@ export default function LiveStreamViewPage() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showChat, setShowChat] = useState(true);
+  const [showGiftPanel, setShowGiftPanel] = useState(false);
   const [reactions, setReactions] = useState([]);
+  const [giftAnimations, setGiftAnimations] = useState([]);
   
   // Agora states
   const [agoraClient, setAgoraClient] = useState(null);
@@ -45,6 +47,7 @@ export default function LiveStreamViewPage() {
   const wsRef = useRef(null);
   const chatContainerRef = useRef(null);
   const reactionIdRef = useRef(0);
+  const giftIdRef = useRef(0);
 
   // Fetch stream details
   useEffect(() => {
