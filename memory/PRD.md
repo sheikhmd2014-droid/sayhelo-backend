@@ -1,7 +1,7 @@
 # FunMastis - Short Video Social App PRD
 
 ## Original Problem Statement
-TikTok jaisi social media app banana hai with:
+Short video social media app banana hai with:
 - Video upload aur dekhna
 - Like, comment, share
 - Follow/Followers system
