@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import VideoCard from '../components/VideoCard';
+import NotificationBell from '../components/NotificationBell';
 import { Play } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
