@@ -616,6 +616,29 @@ export default function LiveStreamViewPage() {
         .animate-float-up {
           animation: floatUp 2s ease-out forwards;
         }
+        @keyframes giftPop {
+          0% {
+            opacity: 0;
+            transform: scale(0.5);
+          }
+          20% {
+            opacity: 1;
+            transform: scale(1.2);
+          }
+          40% {
+            transform: scale(1);
+          }
+          80% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+        }
+        .animate-gift-pop {
+          animation: giftPop 4s ease-out forwards;
+        }
       `}</style>
     </div>
   );
