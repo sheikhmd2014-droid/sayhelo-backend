@@ -662,15 +662,29 @@ async def create_video(video_data: VideoCreate, current_user: dict = Depends(get
 
 @api_router.get("/videos/feed", response_model=List[VideoResponse])
 async def get_feed(skip: int = 0, limit: int = 10, current_user: Optional[dict] = Depends(get_optional_user)):
-    videos = await db.videos.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    # Optimized query with projection
+    videos = await db.videos.find(
+        {"is_approved": True}, 
+        {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     
-    result = []
-    for video in videos:
-        is_liked = False
-        if current_user:
-            like = await db.likes.find_one({"video_id": video['id'], "user_id": current_user['id']})
-            is_liked = like is not None
-        result.append(VideoResponse(**video, is_liked=is_liked))
+    if not videos:
+        return []
+    
+    # Batch fetch likes for current user (single query instead of N queries)
+    liked_video_ids = set()
+    if current_user:
+        video_ids = [v['id'] for v in videos]
+        likes = await db.likes.find(
+            {"video_id": {"$in": video_ids}, "user_id": current_user['id']},
+            {"video_id": 1}
+        ).to_list(None)
+        liked_video_ids = {like['video_id'] for like in likes}
+    
+    result = [
+        VideoResponse(**video, is_liked=video['id'] in liked_video_ids)
+        for video in videos
+    ]
     
     return result
 
