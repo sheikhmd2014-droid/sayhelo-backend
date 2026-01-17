@@ -847,6 +847,26 @@ async def get_uploaded_video(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_path, media_type="video/mp4")
 
+@api_router.get("/uploads/avatars/{filename}")
+async def get_avatar(filename: str):
+    from fastapi.responses import FileResponse
+    file_path = UPLOAD_DIR / "avatars" / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Avatar not found")
+    
+    # Determine content type
+    ext = filename.split('.')[-1].lower()
+    content_types = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp'
+    }
+    content_type = content_types.get(ext, 'image/jpeg')
+    
+    return FileResponse(file_path, media_type=content_type)
+
 # ==================== ADMIN HELPER ====================
 
 async def get_admin_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
