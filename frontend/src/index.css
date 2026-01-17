@@ -71,6 +71,17 @@ img, video {
     }
 }
 
+/* Hide Emergent badge */
+#emergent-badge,
+a[href*="emergent.sh"],
+[id*="emergent"],
+div[style*="Made with"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
 .font-unbounded {
     font-family: 'Unbounded', sans-serif;
 }
