@@ -146,6 +146,43 @@ export default function ProfilePage() {
     }
   };
 
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploadingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post(`${API}/users/upload-avatar`, formData, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      setEditData({ ...editData, avatar: response.data.avatar_url });
+      toast.success('Photo uploaded!');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to upload photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
   const avatarOptions = [
     `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.username}`,
     `https://api.dicebear.com/7.x/bottts/svg?seed=${profile?.username}`,
