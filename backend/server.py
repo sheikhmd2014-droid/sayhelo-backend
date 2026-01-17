@@ -223,6 +223,45 @@ class NotificationResponse(BaseModel):
     is_read: bool = False
     created_at: str
 
+# Coin/Wallet Models
+class CoinPackage(BaseModel):
+    id: str
+    name: str
+    coins: int
+    price_inr: int
+    price_usd: float
+    bonus_coins: int = 0
+
+class WalletResponse(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    coins: int = 0
+    earned_coins: int = 0  # Coins from gifts received
+    total_withdrawn: int = 0
+
+class GiftItem(BaseModel):
+    id: str
+    name: str
+    emoji: str
+    coins: int
+
+class SendGiftRequest(BaseModel):
+    gift_id: str
+    stream_id: str
+    receiver_id: str
+
+class CreateOrderRequest(BaseModel):
+    package_id: str
+
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+    package_id: str
+
+class WithdrawRequest(BaseModel):
+    coins: int
+
 # ==================== AUTH HELPERS ====================
 
 def hash_password(password: str) -> str:
