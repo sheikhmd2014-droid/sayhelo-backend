@@ -42,6 +42,16 @@ JWT_EXPIRATION_HOURS = 24
 AGORA_APP_ID = os.environ.get('AGORA_APP_ID', '')
 AGORA_APP_CERTIFICATE = os.environ.get('AGORA_APP_CERTIFICATE', '')
 
+# Razorpay Config
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')
+PLATFORM_COMMISSION = int(os.environ.get('PLATFORM_COMMISSION', '30'))
+
+# Initialize Razorpay client
+razorpay_client = None
+if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
+    razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
+
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
