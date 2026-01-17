@@ -488,7 +488,15 @@ export default function LiveStreamViewPage() {
 
         {/* Viewer Leave Button */}
         {!isHost && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3">
+            <Button
+              onClick={() => setShowGiftPanel(!showGiftPanel)}
+              className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+              data-testid="gift-btn"
+            >
+              <Gift className="w-4 h-4 mr-2" />
+              Send Gift
+            </Button>
             <Button
               variant="outline"
               onClick={leaveStream}
@@ -497,6 +505,17 @@ export default function LiveStreamViewPage() {
               <X className="w-4 h-4 mr-2" />
               Leave
             </Button>
+          </div>
+        )}
+
+        {/* Gift Panel */}
+        {showGiftPanel && !isHost && stream && (
+          <div className="absolute bottom-20 left-0 right-0 z-20">
+            <GiftPanel 
+              streamId={streamId} 
+              receiverId={stream.host_id}
+              onClose={() => setShowGiftPanel(false)}
+            />
           </div>
         )}
       </div>
