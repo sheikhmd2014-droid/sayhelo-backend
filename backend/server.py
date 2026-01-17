@@ -278,6 +278,55 @@ def hash_password(password: str) -> str:
 def verify_password(password: str, hashed: str) -> bool:
     return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
 
+# ==================== EMAIL HELPER ====================
+
+async def send_reset_email(to_email: str, reset_code: str):
+    """Send password reset email using Resend"""
+    if not RESEND_API_KEY:
+        logging.warning("Resend API key not configured, email not sent")
+        return False
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; background-color: #000; color: #fff; padding: 20px; }}
+            .container {{ max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 16px; padding: 30px; }}
+            .logo {{ text-align: center; font-size: 28px; font-weight: bold; color: #D946EF; margin-bottom: 20px; }}
+            .code {{ background: #D946EF; color: white; font-size: 32px; font-weight: bold; text-align: center; padding: 15px 30px; border-radius: 12px; letter-spacing: 8px; margin: 20px 0; }}
+            .text {{ color: #ccc; font-size: 14px; text-align: center; margin: 15px 0; }}
+            .footer {{ text-align: center; color: #666; font-size: 12px; margin-top: 30px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="logo">🎬 FunMastis</div>
+            <p class="text">Password reset karne ke liye ye OTP use karo:</p>
+            <div class="code">{reset_code}</div>
+            <p class="text">Ye code 15 minutes mein expire ho jayega.</p>
+            <p class="text">Agar aapne password reset request nahi ki hai, toh is email ko ignore karo.</p>
+            <div class="footer">© 2026 FunMastis. All rights reserved.</div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    params = {
+        "from": SENDER_EMAIL,
+        "to": [to_email],
+        "subject": "🔐 FunMastis - Password Reset OTP",
+        "html": html_content
+    }
+    
+    try:
+        email = await asyncio.to_thread(resend.Emails.send, params)
+        logging.info(f"Reset email sent to {to_email}")
+        return True
+    except Exception as e:
+        logging.error(f"Failed to send reset email: {str(e)}")
+        return False
+
 def create_token(user_id: str) -> str:
     payload = {
         "user_id": user_id,
