@@ -98,6 +98,13 @@ TikTok jaisi social media app banana hai with:
 
 ## Recent Updates (January 2026)
 
+### Profile Photo Upload - COMPLETED ✅ (Jan 17, 2026)
+- Custom photo upload option added
+- Camera icon on avatar for quick upload
+- "Upload Your Photo" button
+- Support for JPEG, PNG, GIF, WebP (max 5MB)
+- Pre-made avatars still available as fallback
+
 ### In-App Notifications - COMPLETED ✅ (Jan 17, 2026)
 - Bell icon with unread count badge
 - Dropdown showing all notifications
