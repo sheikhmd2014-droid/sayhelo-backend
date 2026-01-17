@@ -227,6 +227,36 @@ def create_token(user_id: str) -> str:
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
+# ==================== NOTIFICATION HELPER ====================
+
+async def create_notification(
+    user_id: str,
+    notification_type: str,
+    from_user: dict,
+    video_id: Optional[str] = None,
+    video_caption: Optional[str] = None,
+    comment_text: Optional[str] = None
+):
+    """Create a notification for a user"""
+    # Don't notify yourself
+    if user_id == from_user['id']:
+        return
+    
+    notification_doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": user_id,
+        "type": notification_type,
+        "from_user_id": from_user['id'],
+        "from_username": from_user['username'],
+        "from_avatar": from_user.get('avatar'),
+        "video_id": video_id,
+        "video_caption": video_caption[:50] + "..." if video_caption and len(video_caption) > 50 else video_caption,
+        "comment_text": comment_text[:100] + "..." if comment_text and len(comment_text) > 100 else comment_text,
+        "is_read": False,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    await db.notifications.insert_one(notification_doc)
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     try:
         payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
