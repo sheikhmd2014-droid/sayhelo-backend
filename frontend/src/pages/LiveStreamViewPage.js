@@ -189,6 +189,18 @@ export default function LiveStreamViewPage() {
         }]);
       } else if (data.type === "reaction") {
         showReaction(data.emoji);
+      } else if (data.type === "gift") {
+        // Show gift animation
+        showGiftAnimation(data.gift_emoji, data.sender_username, data.gift_name, data.coins);
+        // Add to chat
+        setMessages(prev => [...prev, {
+          type: "gift",
+          sender_username: data.sender_username,
+          gift_emoji: data.gift_emoji,
+          gift_name: data.gift_name,
+          coins: data.coins,
+          created_at: new Date().toISOString()
+        }]);
       } else if (data.type === "stream_ended") {
         alert("Stream has ended");
         navigate("/live");
