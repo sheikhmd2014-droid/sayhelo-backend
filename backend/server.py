@@ -37,6 +37,10 @@ if not JWT_SECRET:
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
+# Agora Config
+AGORA_APP_ID = os.environ.get('AGORA_APP_ID', '')
+AGORA_APP_CERTIFICATE = os.environ.get('AGORA_APP_CERTIFICATE', '')
+
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
