@@ -446,6 +446,13 @@ async def follow_user(user_id: str, current_user: dict = Depends(get_current_use
     await db.users.update_one({"id": user_id}, {"$inc": {"followers_count": 1}})
     await db.users.update_one({"id": current_user['id']}, {"$inc": {"following_count": 1}})
     
+    # Create notification for followed user
+    await create_notification(
+        user_id=user_id,
+        notification_type="follow",
+        from_user=current_user
+    )
+    
     return {"message": "Followed successfully"}
 
 @api_router.delete("/users/{user_id}/follow")
