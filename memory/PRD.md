@@ -135,7 +135,7 @@ TikTok jaisi social media app banana hai with:
 - Performance optimizations (lazy loading, memoization)
 
 ## Next Tasks
-1. Push Notifications for likes/comments/follows
-2. Hashtags & trending system
-3. Video effects/filters improvements
-4. Native Mobile App (Google Play Store / iOS App Store)
+1. Hashtags & trending system
+2. Video effects/filters improvements
+3. Native Mobile App (Google Play Store / iOS App Store)
+4. Browser Push Notifications (optional enhancement)
