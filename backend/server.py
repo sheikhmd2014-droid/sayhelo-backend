@@ -419,6 +419,43 @@ async def update_profile(profile: ProfileUpdate, current_user: dict = Depends(ge
     user = await db.users.find_one({"id": current_user['id']}, {"_id": 0, "password": 0})
     return UserResponse(**user)
 
+@api_router.post("/users/upload-avatar")
+async def upload_avatar(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
+    """Upload a custom profile photo"""
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Use JPEG, PNG, GIF or WebP")
+    
+    # Validate file size (max 5MB)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File too large. Maximum size is 5MB")
+    
+    # Create avatars directory
+    avatar_dir = Path("uploads/avatars")
+    avatar_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Generate unique filename
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+    filename = f"{current_user['id']}_{uuid.uuid4().hex[:8]}.{file_ext}"
+    file_path = avatar_dir / filename
+    
+    # Save file
+    with open(file_path, "wb") as f:
+        f.write(contents)
+    
+    # Generate URL
+    avatar_url = f"/api/uploads/avatars/{filename}"
+    
+    # Update user profile
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {"avatar": avatar_url}}
+    )
+    
+    return {"avatar_url": avatar_url, "message": "Avatar uploaded successfully"}
+
 @api_router.post("/users/{user_id}/follow")
 async def follow_user(user_id: str, current_user: dict = Depends(get_current_user)):
     if user_id == current_user['id']:
