@@ -690,7 +690,23 @@ async def get_feed(skip: int = 0, limit: int = 10, current_user: Optional[dict] 
 
 @api_router.get("/videos/user/{user_id}", response_model=List[VideoResponse])
 async def get_user_videos(user_id: str, skip: int = 0, limit: int = 20, current_user: Optional[dict] = Depends(get_optional_user)):
-    videos = await db.videos.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    videos = await db.videos.find(
+        {"user_id": user_id}, 
+        {"_id": 0}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    if not videos:
+        return []
+    
+    # Batch fetch likes
+    liked_video_ids = set()
+    if current_user:
+        video_ids = [v['id'] for v in videos]
+        likes = await db.likes.find(
+            {"video_id": {"$in": video_ids}, "user_id": current_user['id']},
+            {"video_id": 1}
+        ).to_list(None)
+        liked_video_ids = {like['video_id'] for like in likes}
     
     result = []
     for video in videos:
