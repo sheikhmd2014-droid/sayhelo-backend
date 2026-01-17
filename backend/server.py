@@ -16,7 +16,7 @@ import bcrypt
 import base64
 import shutil
 import json
-from agora_token_builder import RtcTokenBuilder, Role_Publisher, Role_Subscriber
+from agora_token_builder import RtcTokenBuilder
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
